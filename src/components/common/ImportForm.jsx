@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const ImportForm = ({ onClose, onSubmit }) => {
+const ImportForm = ({ onClose, onSubmit, title = "Import Data" }) => {
   const [file, setFile] = useState(null);
 
   const handleSubmit = (e) => {
@@ -19,7 +19,7 @@ const ImportForm = ({ onClose, onSubmit }) => {
         ✕
       </button>
 
-      <h3 className="text-xl font-bold text-indigo-700 mb-4">Import Data</h3>
+      <h3 className="text-xl font-bold text-indigo-700 mb-4">{title}</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

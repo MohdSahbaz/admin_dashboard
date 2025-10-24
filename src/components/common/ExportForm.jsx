@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const ExportForm = ({ onClose, onSubmit }) => {
+const ExportForm = ({ onClose, onSubmit, title = "Export Data" }) => {
   const [format, setFormat] = useState("csv");
 
   const handleSubmit = (e) => {
@@ -18,7 +18,7 @@ const ExportForm = ({ onClose, onSubmit }) => {
         ✕
       </button>
 
-      <h3 className="text-xl font-bold text-green-700 mb-4">Export Data</h3>
+      <h3 className="text-xl font-bold text-green-700 mb-4">{title}</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

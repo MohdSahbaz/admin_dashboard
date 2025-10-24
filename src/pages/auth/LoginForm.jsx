@@ -3,14 +3,8 @@ import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { MdMail, MdLock } from "react-icons/md";
-// import axios from "axios";
-
-const user = {
-  name: "sahbaz",
-  email: "sahbaz@gmail.com",
-  password: "123",
-  role: "admin",
-};
+import axios from "axios";
+import api from "../../api/api";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -23,26 +17,27 @@ const LoginForm = () => {
     setLoading(true);
 
     try {
-      if (formData.email === "" || formData.password === "") {
+      if (!formData.email || !formData.password) {
         toast.error("Please fill in all fields");
         setLoading(false);
         return;
       }
 
-      if (
-        formData.email !== user.email ||
-        formData.password !== user.password
-      ) {
-        toast.error("Invalid email or password");
-        setLoading(false);
-        return;
-      }
+      const response = await api.post("/admin/login", {
+        email: formData.email,
+        password: formData.password,
+      });
 
-      login(user);
+      const { token, user } = response.data;
+
+      // Save token securely
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      login(user); // update context
       toast.success("Login successful");
       navigate("/");
     } catch (err) {
-      // Axios error handling
       const message =
         err.response?.data?.message || err.message || "Login failed";
       toast.error(message);

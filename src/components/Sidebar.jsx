@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { MdLogoDev, MdDashboard, MdLogout } from "react-icons/md";
+import { GiHospitalCross } from "react-icons/gi";
 import { GiCampingTent } from "react-icons/gi";
 import { FaUserDoctor } from "react-icons/fa6";
 import { HiMiniUsers } from "react-icons/hi2";
@@ -37,8 +38,8 @@ const Sidebar = ({ onLogout, open, onClose }) => {
         {/* Header / Logo */}
         <div className="flex items-center px-7 h-20 border-b border-gray-200">
           {/* <img src={MdLogoDev} className="h-12 w-12" /> */}
-          <MdLogoDev className="h-10 w-10 text-blue-700" />
-          <span className="text-xl font-bold ml-2 text-blue-800">Dev</span>
+          <GiHospitalCross className="h-8 w-8 text-blue-700" />
+          <span className="text-xl font-bold ml-2 text-blue-800">Lloyd</span>
         </div>
 
         {/* Navigation */}
