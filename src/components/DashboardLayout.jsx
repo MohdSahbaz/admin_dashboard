@@ -17,18 +17,20 @@ const DashboardLayout = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-blue-50">
       {/* Sidebar */}
-      <Sidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        onLogout={handleLogout}
-      />
+      <div className="fixed top-0 left-0 z-50">
+        <Sidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          onLogout={handleLogout}
+        />
+      </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col md:ml-64">
         {/* Header */}
         <Header
-          userEmail={user?.email || "user@example.com"}
-          userName={user?.name || "User"}
+          userEmail={user?.email || "NA"}
+          userName={user?.name || "NA"}
           onMenuClick={() => setSidebarOpen(true)}
         />
 

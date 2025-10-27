@@ -31,7 +31,7 @@ const Sidebar = ({ onLogout, open, onClose }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-white text-gray-700 flex flex-col justify-between transform transition-transform duration-300 ease-in-out ${
+        className={`fixed md:static h-screen inset-y-0 left-0 z-50 w-64 bg-white text-gray-700 flex flex-col justify-between transform transition-transform duration-300 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 shadow-lg`}
       >

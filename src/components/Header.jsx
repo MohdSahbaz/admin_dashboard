@@ -2,7 +2,7 @@ import React from "react";
 import { MdMenu } from "react-icons/md";
 
 const Header = ({ userEmail, userName, onMenuClick }) => (
-  <header className="flex items-center justify-between h-20 px-4 md:px-8 border-b border-gray-200 bg-white shadow-sm">
+  <header className="sticky top-0 z-40 flex items-center justify-between h-20 px-4 md:px-8 border-b border-gray-200 bg-white shadow-sm">
     {/* Left: Hamburger + Title */}
     <div className="flex items-center space-x-4">
       {/* Hamburger - only on mobile */}
@@ -14,7 +14,7 @@ const Header = ({ userEmail, userName, onMenuClick }) => (
         <MdMenu className="h-6 w-6 text-blue-700" />
       </button>
       <h1 className="text-lg md:text-xl font-bold text-blue-800">
-        Welcome back, {userName}!
+        Welcome back!
       </h1>
     </div>
 

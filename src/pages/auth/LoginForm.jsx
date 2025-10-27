@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { MdMail, MdLock } from "react-icons/md";
 import axios from "axios";
-import api from "../../api/api";
+import api from "../../api/axios";
 
 const LoginForm = () => {
   const navigate = useNavigate();

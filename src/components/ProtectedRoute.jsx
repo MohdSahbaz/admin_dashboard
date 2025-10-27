@@ -6,7 +6,7 @@ const ProtectedRoute = ({ children, role }) => {
 
   if (loading) return <div>Loading...</div>;
 
-  if (!isLoggedIn || !token) {
+  if (!isLoggedIn || !token || !user) {
     return <Navigate to="/login" replace />;
   }
 

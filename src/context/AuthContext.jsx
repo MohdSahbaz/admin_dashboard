@@ -13,10 +13,11 @@ export const AuthProvider = ({ children }) => {
   // check user from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("authToken");
+    const storedToken = localStorage.getItem("authToken");
 
-    if (storedUser && token) {
+    if (storedUser && storedToken) {
       setUser(JSON.parse(storedUser));
+      setToken(storedToken);
       setIsLoggedIn(true);
     }
 
