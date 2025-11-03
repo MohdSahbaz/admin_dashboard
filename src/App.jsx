@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginForm from "./pages/auth/LoginForm";
 import DashboardPage from "./pages/DashboardPage";
@@ -52,5 +53,31 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      {/* Toast notifications available globally */}
+      <RouterProvider router={router} />
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          success: {
+            style: {
+              background: "#dcfce7", // soft green
+              color: "#166534", // dark green text
+              borderLeft: "6px solid #16a34a", // accent border
+              fontWeight: 500,
+            },
+          },
+          error: {
+            style: {
+              background: "#fee2e2", // soft red
+              color: "#991b1b", // dark red text
+              borderLeft: "6px solid #dc2626",
+              fontWeight: 500,
+            },
+          },
+        }}
+      />
+    </>
+  );
 }

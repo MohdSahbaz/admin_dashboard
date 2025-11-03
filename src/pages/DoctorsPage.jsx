@@ -6,8 +6,14 @@ import ExportForm from "../components/common/ExportForm";
 import AddForm from "../components/doctor/AddForm";
 import api from "../api/axios";
 import Loader from "../components/common/Loader";
+import toast from "react-hot-toast";
+import { FaDatabase } from "react-icons/fa6";
+import { BiDownload, BiPlus, BiSearch, BiUpload } from "react-icons/bi";
 
 const DoctorsPage = () => {
+  const [selectedTab, setSelectedTab] = useState("master");
+  const [dbTab, setDBTab] = useState("d2c");
+
   const [modalType, setModalType] = useState(null);
   const [doctorData, setDoctorData] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -35,7 +41,8 @@ const DoctorsPage = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const fetchDoctors = useCallback(async () => {
+  // fetch master doctore data
+  const fetchMasterDoctors = useCallback(async () => {
     setLoader(true);
     setError(null);
     try {
@@ -51,9 +58,30 @@ const DoctorsPage = () => {
     }
   }, [page, limit, debouncedSearch, sortBy, order]);
 
+  // fetch selcted doctore data
+  const fetchSelectedDoctors = useCallback(async () => {
+    setLoader(true);
+    setError(null);
+    try {
+      const response = await api.get(
+        `/admin/selected-doctors?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}`
+      );
+      setDoctorData(response.data.data || []);
+      setTotal(response.data.total || 0);
+    } catch (err) {
+      setError("Failed to fetch doctors");
+    } finally {
+      setLoader(false);
+    }
+  }, [page, limit, debouncedSearch, sortBy, order]);
+
   useEffect(() => {
-    fetchDoctors();
-  }, [fetchDoctors]);
+    if (selectedTab === "master") {
+      fetchMasterDoctors();
+    } else {
+      fetchSelectedDoctors();
+    }
+  }, [fetchSelectedDoctors, fetchMasterDoctors, selectedTab]);
 
   // toggle sorting
   const handleSort = (field) => {
@@ -70,21 +98,42 @@ const DoctorsPage = () => {
     return order === "asc" ? "⬆️" : "⬇️";
   };
 
-  const handleImport = (file) => {
-    console.log("Importing doctors file:", file);
+  const handleImport = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await api.post("/admin/import-doctors", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      toast.success(
+        `${res?.data?.message} \n Inserted: ${res.data.inserted} data`
+      );
+    } catch (error) {
+      toast.error(
+        "Import failed: " + (error.response?.data?.message || error.message)
+      );
+    }
   };
 
-  const handleExport = async (format) => {
+  const handleExport = async (format, paginationData = null) => {
     try {
       const exportFormat = format === "excel" ? "xlsx" : format;
 
-      const response = await api.get(
-        `/admin/export-doctors?format=${exportFormat}`,
-        {
-          responseType: "blob",
-        }
-      );
+      // Build query string dynamically
+      let query = `/admin/export-doctors?format=${exportFormat}`;
 
+      // Add offset & limit if provided
+      if (paginationData && paginationData.offset && paginationData.limit) {
+        query += `&offset=${paginationData.offset}&limit=${paginationData.limit}`;
+      }
+
+      const response = await api.get(query, {
+        responseType: "blob",
+      });
+
+      // Create file and trigger download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -92,8 +141,15 @@ const DoctorsPage = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
+
+      toast.success(
+        paginationData
+          ? `Exported ${paginationData.limit} records starting from ${paginationData.offset}.`
+          : "All data exported successfully!"
+      );
     } catch (error) {
-      console.error("Error exporting doctors:", error);
+      toast.error("Export failed. Please try again.");
+      console.error(error);
     }
   };
 
@@ -105,198 +161,352 @@ const DoctorsPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <h2 className="text-2xl font-bold text-blue-800">Doctors</h2>
-          <div className="flex flex-wrap gap-2 sm:space-x-3">
-            <button
-              onClick={() => setModalType("import")}
-              className="cursor-pointer px-4 py-2 bg-blue-100 text-blue-700 font-medium rounded-lg hover:bg-blue-200 transition"
-            >
-              Import
-            </button>
-            <button
-              onClick={() => setModalType("export")}
-              className="cursor-pointer px-4 py-2 bg-green-100 text-green-700 font-medium rounded-lg hover:bg-green-200 transition"
-            >
-              Export
-            </button>
-            <button
-              onClick={() => setModalType("add")}
-              className="cursor-pointer px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-
-        {/* Search bar */}
-        <div className="relative w-full">
-          <div className="flex items-center w-full bg-white border border-gray-300 rounded-md px-4 py-2 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-5 h-5 text-gray-500 mr-3"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
-              />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search doctors by name, specialization, or state..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="w-full outline-none text-gray-700 placeholder-gray-400 bg-transparent"
-            />
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto hidden sm:block">
-          {loader ? (
-            <Loader />
-          ) : error ? (
-            <div className="text-center py-6 text-red-600">{error}</div>
-          ) : (
-            <table className="min-w-full bg-white rounded-lg shadow border border-gray-200">
-              <thead className="bg-blue-100 sticky top-0 z-10">
-                <tr className="text-sm text-blue-900">
-                  <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
-                    onClick={() => handleSort("dr_name")}
-                  >
-                    Name {getSortIcon("dr_name")}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
-                    onClick={() => handleSort("speciality")}
-                  >
-                    Specialization {getSortIcon("speciality")}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
-                    onClick={() => handleSort("no_patients")}
-                  >
-                    Patients {getSortIcon("no_patients")}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
-                    onClick={() => handleSort("clinic_state")}
-                  >
-                    Clinic State {getSortIcon("clinic_state")}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
-                    onClick={() => handleSort("status")}
-                  >
-                    Availability {getSortIcon("status")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="text-sm text-gray-700">
-                {doctorData.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="text-center py-6 text-gray-500 italic"
-                    >
-                      No doctors found
-                    </td>
-                  </tr>
-                ) : (
-                  doctorData.map((doctor, index) => (
-                    <tr
-                      key={index}
-                      className={index % 2 === 0 ? "bg-white" : "bg-blue-50"}
-                    >
-                      <td className="px-6 py-3">{doctor.dr_name}</td>
-                      <td className="px-6 py-3">{doctor.speciality}</td>
-                      <td className="px-6 py-3">{doctor.no_patients || "—"}</td>
-                      <td className="px-6 py-3">{doctor.clinic_state}</td>
-                      <td className="px-6 py-3">
-                        {doctor.status === "A" ? (
-                          <span className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
-                            Active
-                          </span>
-                        ) : (
-                          <span className="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
-                            Inactive
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        {/* Mobile Cards (visible only on small screens) */}
-        <div className="space-y-4 sm:hidden mt-4">
-          {loader && <Loader />}
-          {error && (
-            <div className="text-center py-6 text-red-600">{error}</div>
-          )}
-          {doctorData.length === 0 ? (
-            <div className="text-center text-gray-500 py-6">
-              {error ? "" : "No doctors found."}
+      <div className="space-y-6 md:max-w-[calc(100vw-19rem)]">
+        {/* Header Section */}
+        <div className="w-full p-6 bg-white dark:bg-white text-black rounded-sm border border-gray-100 dark:border-blue-800 transition">
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <h2 className="text-2xl font-bold text-blue-800">Doctors</h2>
+              {/* ✅ Total Doctors Count */}
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-700 bg-gray-100 dark:bg-gray-200 px-3 py-1 rounded-sm">
+                Total:{" "}
+                <span className="font-semibold text-blue-700">{total}</span>
+              </span>
             </div>
-          ) : (
-            doctorData.map((doctor, index) => (
-              <div
-                key={index}
-                className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 transition hover:shadow-md"
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-semibold text-blue-800">
-                    {doctor.dr_name}
-                  </h3>
-                  <span
-                    className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      doctor.status === "A"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {doctor.status === "A" ? "Active" : "Inactive"}
-                  </span>
-                </div>
 
-                <div className="text-sm text-gray-700 space-y-1">
-                  <p>
-                    <span className="font-semibold text-gray-600">
-                      Specialization:
-                    </span>{" "}
-                    {doctor.speciality || "—"}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-600">
-                      Patients:
-                    </span>{" "}
-                    {doctor.no_patients || "—"}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-600">
-                      Clinic State:
-                    </span>{" "}
-                    {doctor.clinic_state || "—"}
-                  </p>
-                </div>
-              </div>
-            ))
-          )}
+            <div className="flex gap-3">
+              {["master", "selected"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setSelectedTab(tab)}
+                  className={`cursor-pointer hover:scale-105 px-5 py-2.5 rounded-md font-medium text-sm capitalize transition-all duration-200 ${
+                    selectedTab === tab
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            {selectedTab === "master" ? (
+              <>
+                <button
+                  onClick={() => setModalType("import")}
+                  className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-105 text-white rounded-md shadow-sm hover:shadow-md transition"
+                >
+                  <BiUpload className="w-4 h-4" /> Import
+                </button>
+                <button
+                  onClick={() => setModalType("export")}
+                  className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:scale-105 text-white rounded-md shadow-sm hover:shadow-md transition"
+                >
+                  <BiDownload className="w-4 h-4" /> Export
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setModalType("add")}
+                  className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 text-white rounded-md shadow-sm hover:shadow-md transition"
+                >
+                  <BiPlus className="w-4 h-4" /> Add Doctor
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Search and Filter Row */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            {/* Search Input */}
+            <div className="relative w-full md:w-2/3">
+              <BiSearch className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search doctors by name, specialization, or state..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md bg-gray-50 dark:bg-gray-100 text-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            {/* Database Select */}
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <FaDatabase className="text-gray-900 w-5 h-5" />
+              <select
+                value={dbTab}
+                onChange={(e) => setDBTab(e.target.value)}
+                className="cursor-pointer border border-gray-300 rounded-md px-4 py-2.5 dark:bg-gray-100 text-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                <option value="d2c">D2C</option>
+                <option value="lloyd-db">Lloyd DB</option>
+              </select>
+            </div>
+          </div>
         </div>
+
+        {selectedTab === "master" ? (
+          <>
+            {/* Table */}
+            <div className="overflow-x-auto hidden sm:block md:max-w-[calc(100vw-19rem)]">
+              {loader ? (
+                <Loader />
+              ) : error ? (
+                <div className="text-center py-6 text-red-600">{error}</div>
+              ) : (
+                <table className="min-w-full bg-white rounded-lg shadow border border-gray-200">
+                  <thead className="bg-blue-100 sticky top-0 z-10">
+                    <tr className="text-sm text-blue-900">
+                      <th
+                        className="px-6 py-3 text-left font-semibold cursor-pointer"
+                        onClick={() => handleSort("dr_name")}
+                      >
+                        Name {getSortIcon("dr_name")}
+                      </th>
+                      <th
+                        className="px-6 py-3 text-left font-semibold cursor-pointer"
+                        onClick={() => handleSort("speciality")}
+                      >
+                        Specialization {getSortIcon("speciality")}
+                      </th>
+                      <th
+                        className="px-6 py-3 text-left font-semibold cursor-pointer"
+                        onClick={() => handleSort("no_patients")}
+                      >
+                        Patients {getSortIcon("no_patients")}
+                      </th>
+                      <th
+                        className="px-6 py-3 text-left font-semibold cursor-pointer"
+                        onClick={() => handleSort("clinic_state")}
+                      >
+                        Clinic State {getSortIcon("clinic_state")}
+                      </th>
+                      <th
+                        className="px-6 py-3 text-left font-semibold cursor-pointer"
+                        onClick={() => handleSort("status")}
+                      >
+                        Availability {getSortIcon("status")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm text-gray-700">
+                    {doctorData.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="5"
+                          className="text-center py-6 text-gray-500 italic"
+                        >
+                          No doctors found
+                        </td>
+                      </tr>
+                    ) : (
+                      doctorData.map((doctor, index) => (
+                        <tr
+                          key={index}
+                          className={
+                            index % 2 === 0 ? "bg-white" : "bg-blue-50"
+                          }
+                        >
+                          <td className="px-6 py-3">{doctor.dr_name}</td>
+                          <td className="px-6 py-3">{doctor.speciality}</td>
+                          <td className="px-6 py-3">
+                            {doctor.no_patients || "—"}
+                          </td>
+                          <td className="px-6 py-3">{doctor.clinic_state}</td>
+                          <td className="px-6 py-3">
+                            {doctor.status === "A" ? (
+                              <span className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
+                                Active
+                              </span>
+                            ) : (
+                              <span className="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
+                                Inactive
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Mobile Cards (visible only on small screens) */}
+            <div className="space-y-4 sm:hidden mt-4">
+              {loader && <Loader />}
+              {error && (
+                <div className="text-center py-6 text-red-600">{error}</div>
+              )}
+              {doctorData.length === 0 ? (
+                <div className="text-center text-gray-500 py-6">
+                  {error ? "" : "No doctors found."}
+                </div>
+              ) : (
+                doctorData.map((doctor, index) => (
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 transition hover:shadow-md"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-lg font-semibold text-blue-800">
+                        {doctor.dr_name}
+                      </h3>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          doctor.status === "A"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {doctor.status === "A" ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+
+                    <div className="text-sm text-gray-700 space-y-1">
+                      <p>
+                        <span className="font-semibold text-gray-600">
+                          Specialization:
+                        </span>{" "}
+                        {doctor.speciality || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-gray-600">
+                          Patients:
+                        </span>{" "}
+                        {doctor.no_patients || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-gray-600">
+                          Clinic State:
+                        </span>{" "}
+                        {doctor.clinic_state || "—"}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Selected Table */}
+            <div className="overflow-x-auto  block md:max-w-[calc(100vw-19rem)]">
+              {loader ? (
+                <Loader />
+              ) : error ? (
+                <div className="text-center py-6 text-red-600">{error}</div>
+              ) : (
+                <table className="min-w-full bg-white rounded-lg shadow border border-gray-200">
+                  <thead className="bg-blue-100 sticky top-0 z-10">
+                    <tr className="text-sm text-blue-900">
+                      <th
+                        className="px-6 py-3 text-left font-semibold cursor-pointer"
+                        onClick={() => handleSort("doctor_code")}
+                      >
+                        Doctor Code {getSortIcon("doctor_code")}
+                      </th>
+                      <th
+                        className="px-6 py-3 text-left font-semibold cursor-pointer"
+                        onClick={() => handleSort("division")}
+                      >
+                        Division {getSortIcon("division")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm text-gray-700">
+                    {doctorData.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="5"
+                          className="text-center py-6 text-gray-500 italic"
+                        >
+                          No doctors found
+                        </td>
+                      </tr>
+                    ) : (
+                      doctorData.map((doctor, index) => (
+                        <tr
+                          key={index}
+                          className={
+                            index % 2 === 0 ? "bg-white" : "bg-blue-50"
+                          }
+                        >
+                          <td className="px-6 py-3">{doctor.doctor_code}</td>
+                          <td className="px-6 py-3">{doctor.division}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Mobile Cards (visible only on small screens) */}
+            {/* <div className="space-y-4 hidden mt-4">
+              {loader && <Loader />}
+              {error && (
+                <div className="text-center py-6 text-red-600">{error}</div>
+              )}
+              {doctorData.length === 0 ? (
+                <div className="text-center text-gray-500 py-6">
+                  {error ? "" : "No doctors found."}
+                </div>
+              ) : (
+                doctorData.map((doctor, index) => (
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 transition hover:shadow-md"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-lg font-semibold text-blue-800">
+                        {doctor.dr_name}
+                      </h3>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          doctor.status === "A"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {doctor.status === "A" ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+
+                    <div className="text-sm text-gray-700 space-y-1">
+                      <p>
+                        <span className="font-semibold text-gray-600">
+                          Specialization:
+                        </span>{" "}
+                        {doctor.speciality || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-gray-600">
+                          Patients:
+                        </span>{" "}
+                        {doctor.no_patients || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-gray-600">
+                          Clinic State:
+                        </span>{" "}
+                        {doctor.clinic_state || "—"}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div> */}
+          </>
+        )}
 
         {error !== null ||
           (doctorData.length !== 0 && (

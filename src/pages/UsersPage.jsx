@@ -104,9 +104,9 @@ const UsersPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 md:max-w-[calc(100vw-19rem)]">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 md:max-w-[calc(100vw-19rem)]">
           <h2 className="text-2xl font-bold text-blue-800">Users</h2>
           <div className="flex flex-wrap gap-2 sm:space-x-3">
             <button
@@ -131,7 +131,7 @@ const UsersPage = () => {
         </div>
 
         {/* Search */}
-        <div className="relative w-full">
+        <div className="relative w-fit sm:w-[50vw] sm:max-w-[100vw] md:max-w-[calc(100vw-19rem)]">
           <div className="flex items-center w-full bg-white border border-gray-300 rounded-md px-4 py-2 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -161,7 +161,7 @@ const UsersPage = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto hidden sm:block">
+        <div className="overflow-x-auto hidden sm:block max-w-[calc(100vw-19rem)]">
           {loader ? (
             <Loader />
           ) : error ? (

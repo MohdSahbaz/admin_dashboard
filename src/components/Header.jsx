@@ -1,8 +1,8 @@
 import React from "react";
 import { MdMenu } from "react-icons/md";
 
-const Header = ({ userEmail, userName, onMenuClick }) => (
-  <header className="sticky top-0 z-40 flex items-center justify-between h-20 px-4 md:px-8 border-b border-gray-200 bg-white shadow-sm">
+const Header = ({ userEmail, onMenuClick }) => (
+  <header className="fixed w-full md:w-[calc(100vw-16rem)] top-0 right-0 z-40 flex items-center justify-between h-20 px-4 md:px-8 border-b border-gray-200 bg-white shadow-sm ">
     {/* Left: Hamburger + Title */}
     <div className="flex items-center space-x-4">
       {/* Hamburger - only on mobile */}

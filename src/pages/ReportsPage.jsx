@@ -27,7 +27,7 @@ const ReportsPage = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header with buttons */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 md:max-w-[calc(100vw-19rem)]">
           <h2 className="text-2xl font-bold text-blue-800">Reports</h2>
 
           {/* Action buttons */}
