@@ -16,7 +16,6 @@ const DashboardPage = () => {
         setLoader(true);
         setError(null);
         const response = await axios.get("/admin/dashboard");
-        console.log(response.data.data);
         setData(response.data.data);
       } catch (error) {
         setError("Failed to fetch data");

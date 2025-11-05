@@ -9,6 +9,8 @@ import Loader from "../components/common/Loader";
 import toast from "react-hot-toast";
 import { FaDatabase } from "react-icons/fa6";
 import { BiDownload, BiPlus, BiSearch, BiUpload } from "react-icons/bi";
+import FilterMasterDoc from "../components/doctor/FilterMasterDoc";
+import FilterSelectedDoc from "../components/doctor/FilterSelectedDoc";
 
 const DoctorsPage = () => {
   const [selectedTab, setSelectedTab] = useState("master");
@@ -33,6 +35,16 @@ const DoctorsPage = () => {
   // page input for manual navigation
   const [pageInput, setPageInput] = useState("");
 
+  // Master Filters
+  const [masterDivision, setMasterDivision] = useState("");
+  const [masterSpeciality, setMasterSpeciality] = useState("");
+
+  // Selected Filters
+  const [selectedDivision, setSelectedDivision] = useState("");
+  const [selectedDrType, setSelectedDrType] = useState("");
+
+  const [showFilter, setShowFilter] = useState(false);
+
   const handleClose = () => setModalType(null);
 
   // debounce search to avoid multiple calls
@@ -42,46 +54,61 @@ const DoctorsPage = () => {
   }, [search]);
 
   // fetch master doctore data
-  const fetchMasterDoctors = useCallback(async () => {
+  const fetchMasterDoctors = async () => {
     setLoader(true);
     setError(null);
     try {
-      const response = await api.get(
-        `/admin/doctors?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}`
-      );
+      const url = `/admin/doctors?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}&division=${masterDivision}&speciality=${masterSpeciality}`;
+      const response = await api.get(url);
       setDoctorData(response.data.data || []);
       setTotal(response.data.total || 0);
-    } catch (err) {
+    } catch {
       setError("Failed to fetch doctors");
     } finally {
       setLoader(false);
     }
-  }, [page, limit, debouncedSearch, sortBy, order]);
+  };
 
   // fetch selcted doctore data
-  const fetchSelectedDoctors = useCallback(async () => {
+  const fetchSelectedDoctors = async () => {
     setLoader(true);
     setError(null);
     try {
-      const response = await api.get(
-        `/admin/selected-doctors?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}`
-      );
+      const url = `/admin/selected-doctors?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}&db=${dbTab}&division=${selectedDivision}&dr_type=${selectedDrType}`;
+      const response = await api.get(url);
       setDoctorData(response.data.data || []);
       setTotal(response.data.total || 0);
-    } catch (err) {
+    } catch {
       setError("Failed to fetch doctors");
     } finally {
       setLoader(false);
     }
-  }, [page, limit, debouncedSearch, sortBy, order]);
+  };
 
   useEffect(() => {
+    // only switch tab when DB changes
+    setLoader(true);
+    if (dbTab === "lloyd-db") {
+      // delay tab switch slightly so it doesn't trigger old fetch
+      setTimeout(() => setSelectedTab("selected"), 500);
+    }
+
+    setPage(1);
+    setSearch("");
+  }, [dbTab]);
+
+  useEffect(() => {
+    if (!selectedTab) return;
+
+    setDoctorData([]);
+    setLoader(true);
+
     if (selectedTab === "master") {
       fetchMasterDoctors();
     } else {
       fetchSelectedDoctors();
     }
-  }, [fetchSelectedDoctors, fetchMasterDoctors, selectedTab]);
+  }, [selectedTab, page, limit, debouncedSearch, sortBy, order, dbTab]);
 
   // toggle sorting
   const handleSort = (field) => {
@@ -103,13 +130,19 @@ const DoctorsPage = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await api.post("/admin/import-doctors", formData, {
+      const url = `/admin/import-doctors?db=${dbTab}&type=${selectedTab}`;
+
+      const res = await api.post(url, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       toast.success(
         `${res?.data?.message} \n Inserted: ${res.data.inserted} data`
       );
+
+      setLoader(true);
+      if (selectedTab === "master") fetchMasterDoctors();
+      else fetchSelectedDoctors();
     } catch (error) {
       toast.error(
         "Import failed: " + (error.response?.data?.message || error.message)
@@ -121,30 +154,38 @@ const DoctorsPage = () => {
     try {
       const exportFormat = format === "excel" ? "xlsx" : format;
 
-      // Build query string dynamically
-      let query = `/admin/export-doctors?format=${exportFormat}`;
+      let query =
+        selectedTab === "master"
+          ? `/admin/export-doctors?format=${exportFormat}`
+          : `/admin/export-seltab-doctors?format=${exportFormat}&db=${dbTab}`;
 
-      // Add offset & limit if provided
       if (paginationData && paginationData.offset && paginationData.limit) {
         query += `&offset=${paginationData.offset}&limit=${paginationData.limit}`;
       }
 
-      const response = await api.get(query, {
-        responseType: "blob",
-      });
+      const response = await api.get(query, { responseType: "blob" });
 
-      // Create file and trigger download
+      // ✅ Get filename from server
+      const disposition = response.headers["content-disposition"];
+      let filename = "download." + exportFormat;
+
+      if (disposition && disposition.includes("filename=")) {
+        filename = disposition.split("filename=")[1].replace(/"/g, "");
+      }
+
+      // ✅ Download file with correct name
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `doctors.${exportFormat}`);
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
-      link.remove();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
       toast.success(
         paginationData
-          ? `Exported ${paginationData.limit} records starting from ${paginationData.offset}.`
+          ? `Exported ${paginationData.limit} records ( ${selectedTab}-${dbTab} )`
           : "All data exported successfully!"
       );
     } catch (error) {
@@ -176,49 +217,51 @@ const DoctorsPage = () => {
             </div>
 
             <div className="flex gap-3">
-              {["master", "selected"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setSelectedTab(tab)}
-                  className={`cursor-pointer hover:scale-105 px-5 py-2.5 rounded-md font-medium text-sm capitalize transition-all duration-200 ${
-                    selectedTab === tab
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+              {["master", "selected"]
+                .filter((tab) => !(dbTab === "lloyd-db" && tab === "master")) // hide master
+                .map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setSelectedTab(tab)}
+                    className={`cursor-pointer hover:scale-105 px-5 py-2.5 rounded-md font-medium text-sm capitalize transition-all duration-200 ${
+                      selectedTab === tab
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3 mb-6">
-            {selectedTab === "master" ? (
-              <>
-                <button
-                  onClick={() => setModalType("import")}
-                  className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-105 text-white rounded-md shadow-sm hover:shadow-md transition"
-                >
-                  <BiUpload className="w-4 h-4" /> Import
-                </button>
-                <button
-                  onClick={() => setModalType("export")}
-                  className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:scale-105 text-white rounded-md shadow-sm hover:shadow-md transition"
-                >
-                  <BiDownload className="w-4 h-4" /> Export
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => setModalType("add")}
-                  className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 text-white rounded-md shadow-sm hover:shadow-md transition"
-                >
-                  <BiPlus className="w-4 h-4" /> Add Doctor
-                </button>
-              </>
-            )}
+            <button
+              onClick={() => setModalType("import")}
+              className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-105 text-white rounded-md shadow-sm hover:shadow-md transition"
+            >
+              <BiUpload className="w-4 h-4" /> Import
+            </button>
+            <button
+              onClick={() => setModalType("export")}
+              className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:scale-105 text-white rounded-md shadow-sm hover:shadow-md transition"
+            >
+              <BiDownload className="w-4 h-4" /> Export
+            </button>
+
+            <button
+              onClick={() => setModalType("add")}
+              className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 text-white rounded-md shadow-sm hover:shadow-md transition"
+            >
+              <BiPlus className="w-4 h-4" /> Add
+            </button>
+            <button
+              onClick={() => setShowFilter(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md cursor-pointer"
+            >
+              Filter
+            </button>
           </div>
 
           {/* Search and Filter Row */}
@@ -228,7 +271,11 @@ const DoctorsPage = () => {
               <BiSearch className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search doctors by name, specialization, or state..."
+                placeholder={`Search doctors by ${
+                  selectedTab === "master"
+                    ? "name, specialization, or state..."
+                    : "code or division..."
+                }`}
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -256,7 +303,7 @@ const DoctorsPage = () => {
         {selectedTab === "master" ? (
           <>
             {/* Table */}
-            <div className="overflow-x-auto hidden sm:block md:max-w-[calc(100vw-19rem)]">
+            <div className="overflow-x-auto hidden md:block md:max-w-[calc(100vw-19rem)]">
               {loader ? (
                 <Loader />
               ) : error ? (
@@ -279,9 +326,12 @@ const DoctorsPage = () => {
                       </th>
                       <th
                         className="px-6 py-3 text-left font-semibold cursor-pointer"
-                        onClick={() => handleSort("no_patients")}
+                        onClick={() => handleSort("division")}
                       >
-                        Patients {getSortIcon("no_patients")}
+                        Division {getSortIcon("division")}
+                      </th>
+                      <th className="px-6 py-3 text-left font-semibold">
+                        Patients
                       </th>
                       <th
                         className="px-6 py-3 text-left font-semibold cursor-pointer"
@@ -317,6 +367,7 @@ const DoctorsPage = () => {
                         >
                           <td className="px-6 py-3">{doctor.dr_name}</td>
                           <td className="px-6 py-3">{doctor.speciality}</td>
+                          <td className="px-6 py-3">{doctor.division}</td>
                           <td className="px-6 py-3">
                             {doctor.no_patients || "—"}
                           </td>
@@ -341,7 +392,7 @@ const DoctorsPage = () => {
             </div>
 
             {/* Mobile Cards (visible only on small screens) */}
-            <div className="space-y-4 sm:hidden mt-4">
+            <div className="space-y-4 md:hidden mt-4">
               {loader && <Loader />}
               {error && (
                 <div className="text-center py-6 text-red-600">{error}</div>
@@ -420,6 +471,11 @@ const DoctorsPage = () => {
                       >
                         Division {getSortIcon("division")}
                       </th>
+                      {dbTab === "lloyd-db" && (
+                        <th className="px-6 py-3 text-left font-semibold cursor-pointer">
+                          Dr Type
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="text-sm text-gray-700">
@@ -442,6 +498,9 @@ const DoctorsPage = () => {
                         >
                           <td className="px-6 py-3">{doctor.doctor_code}</td>
                           <td className="px-6 py-3">{doctor.division}</td>
+                          {dbTab === "lloyd-db" && (
+                            <td className="px-6 py-3">{doctor.dr_type}</td>
+                          )}
                         </tr>
                       ))
                     )}
@@ -612,6 +671,34 @@ const DoctorsPage = () => {
           <AddForm onClose={handleClose} onSubmit={handleAdd} />
         )}
       </Modal>
+
+      {/* Filter form */}
+      {showFilter && selectedTab === "master" && (
+        <FilterMasterDoc
+          filterDivision={masterDivision}
+          setFilterDivision={setMasterDivision}
+          filterSpeciality={masterSpeciality}
+          setFilterSpeciality={setMasterSpeciality}
+          setShowFilter={setShowFilter}
+          fetchMasterDoctors={fetchMasterDoctors}
+        />
+      )}
+
+      {showFilter && selectedTab === "selected" && (
+        <FilterSelectedDoc
+          dbTab={dbTab}
+          filterDivision={selectedDivision}
+          setFilterDivision={setSelectedDivision}
+          filterDrType={selectedDrType}
+          setFilterDrType={setSelectedDrType}
+          close={() => setShowFilter(false)}
+          apply={() => {
+            setPage(1);
+            fetchSelectedDoctors();
+            setShowFilter(false);
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 };

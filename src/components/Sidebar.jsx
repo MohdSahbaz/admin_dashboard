@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { MdLogoDev, MdDashboard, MdLogout } from "react-icons/md";
+import { MdDashboard, MdLogout } from "react-icons/md";
 import { GiHospitalCross } from "react-icons/gi";
 import { GiCampingTent } from "react-icons/gi";
 import { FaUserDoctor } from "react-icons/fa6";
 import { HiMiniUsers } from "react-icons/hi2";
 import { BiSolidReport } from "react-icons/bi";
+import { FiMapPin } from "react-icons/fi";
 
 const Sidebar = ({ onLogout, open, onClose }) => {
   const linkClass = ({ isActive }) =>
@@ -85,6 +86,15 @@ const Sidebar = ({ onLogout, open, onClose }) => {
               <>
                 <BiSolidReport className={iconClass(isActive)} />
                 Reports
+              </>
+            )}
+          </NavLink>
+
+          <NavLink to="/doctor-locations" className={linkClass}>
+            {({ isActive }) => (
+              <>
+                <FiMapPin className={iconClass(isActive)} />
+                Doctor Locations
               </>
             )}
           </NavLink>

@@ -181,50 +181,54 @@ const CampsPage = () => {
               <thead className="bg-blue-100 sticky top-0 z-10">
                 <tr className="text-sm text-blue-900">
                   <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
+                    className="px-6 py-3 text-left font-semibold cursor-pointer whitespace-nowrap"
                     onClick={() => handleSort("dr_code")}
                   >
                     Dr Code {getSortIcon("dr_code")}
                   </th>
                   <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
+                    className="px-6 py-3 text-left font-semibold cursor-pointer whitespace-nowrap"
                     onClick={() => handleSort("plandate")}
                   >
                     Plan Date {getSortIcon("plandate")}
                   </th>
                   <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
+                    className="px-6 py-3 text-left font-semibold cursor-pointer whitespace-nowrap"
                     onClick={() => handleSort("plantime")}
                   >
                     Plan Time {getSortIcon("plantime")}
                   </th>
                   <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
+                    className="px-6 py-3 text-left font-semibold cursor-pointer whitespace-nowrap"
                     onClick={() => handleSort("location")}
                   >
                     Location {getSortIcon("location")}
                   </th>
                   <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
+                    className="px-6 py-3 text-left font-semibold cursor-pointer whitespace-nowrap"
                     onClick={() => handleSort("city")}
                   >
                     City {getSortIcon("city")}
                   </th>
                   <th
-                    className="px-6 py-3 text-left font-semibold cursor-pointer"
+                    className="px-6 py-3 text-left font-semibold cursor-pointer whitespace-nowrap"
                     onClick={() => handleSort("state")}
                   >
                     State {getSortIcon("state")}
                   </th>
-                  <th className="px-6 py-3 text-left font-semibold">Type</th>
-                  <th className="px-6 py-3 text-left font-semibold">Remark</th>
-                  <th className="px-6 py-3 text-left font-semibold">
+                  <th className="px-6 py-3 text-left font-semibold whitespace-nowrap">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left font-semibold whitespace-nowrap">
+                    Remark
+                  </th>
+                  <th className="px-6 py-3 text-left font-semibold whitespace-nowrap">
                     Assigned
                   </th>
-                  <th className="px-6 py-3 text-left font-semibold">
+                  <th className="px-6 py-3 text-left font-semibold whitespace-nowrap">
                     Attended By
                   </th>
-                  <th className="px-6 py-3 text-left font-semibold">
+                  <th className="px-6 py-3 text-left font-semibold whitespace-nowrap">
                     isactive
                   </th>
                 </tr>
