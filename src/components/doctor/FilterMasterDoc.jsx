@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BiX } from "react-icons/bi";
 import Select from "react-select";
 import api from "../../api/axios";
+import toast from "react-hot-toast";
 
 const FilterMasterDoc = ({
   filterDivision,
@@ -24,7 +25,7 @@ const FilterMasterDoc = ({
       const res = await api.get("/admin/get-all-divisions");
       setDivisionList(res.data.data || []);
     } catch (err) {
-      console.log("Error fetching divisions:", err);
+      toast.error("Error fetching divisions:", err);
     }
   };
 
@@ -33,7 +34,7 @@ const FilterMasterDoc = ({
       const res = await api.get("/admin/get-all-specialities");
       setSpecialityList(res.data.data || []);
     } catch (err) {
-      console.log("Error fetching specialities:", err);
+      toast.error("Error fetching specialities:", err);
     }
   };
 

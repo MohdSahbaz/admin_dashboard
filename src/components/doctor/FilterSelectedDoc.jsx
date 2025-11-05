@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BiX } from "react-icons/bi";
 import Select from "react-select";
 import api from "../../api/axios";
+import toast from "react-hot-toast";
 
 const FilterSelectedDoc = ({
   dbTab, // "d2c" or "lloyd-db"
@@ -25,7 +26,7 @@ const FilterSelectedDoc = ({
       const res = await api.get(`/admin/selected-divisions?db=${dbTab}`);
       setDivisionList(res.data.data || []);
     } catch (err) {
-      console.log("Error fetching divisions:", err);
+      toast.error("Error fetching divisions:", err);
     }
   };
 
@@ -34,7 +35,7 @@ const FilterSelectedDoc = ({
       const res = await api.get("/admin/selected-types");
       setDrTypeList(res.data.data || []);
     } catch (err) {
-      console.log("Error fetching dr_types:", err);
+      toast.error("Error fetching dr_types:", err);
     }
   };
 

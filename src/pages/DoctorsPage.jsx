@@ -3,7 +3,7 @@ import DashboardLayout from "../components/DashboardLayout";
 import Modal from "../components/common/Modal";
 import ImportForm from "../components/common/ImportForm";
 import ExportForm from "../components/common/ExportForm";
-import AddForm from "../components/doctor/AddForm";
+import AddDoctor from "../components/doctor/AddDoctor";
 import api from "../api/axios";
 import Loader from "../components/common/Loader";
 import toast from "react-hot-toast";
@@ -11,6 +11,7 @@ import { FaDatabase } from "react-icons/fa6";
 import { BiDownload, BiPlus, BiSearch, BiUpload } from "react-icons/bi";
 import FilterMasterDoc from "../components/doctor/FilterMasterDoc";
 import FilterSelectedDoc from "../components/doctor/FilterSelectedDoc";
+import { masterDocColumns } from "../config/doctorColumns";
 
 const DoctorsPage = () => {
   const [selectedTab, setSelectedTab] = useState("master");
@@ -29,7 +30,7 @@ const DoctorsPage = () => {
   // search and sorting
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [sortBy, setSortBy] = useState("dr_name");
+  const [sortBy, setSortBy] = useState("division");
   const [order, setOrder] = useState("asc");
 
   // page input for manual navigation
@@ -190,12 +191,7 @@ const DoctorsPage = () => {
       );
     } catch (error) {
       toast.error("Export failed. Please try again.");
-      console.error(error);
     }
-  };
-
-  const handleAdd = (data) => {
-    console.log("Adding new doctor:", data);
   };
 
   const totalPages = Math.ceil(total / limit);
@@ -303,7 +299,13 @@ const DoctorsPage = () => {
         {selectedTab === "master" ? (
           <>
             {/* Table */}
-            <div className="overflow-x-auto hidden md:block md:max-w-[calc(100vw-19rem)]">
+            <div
+              className="overflow-x-auto hidden md:block md:max-w-[calc(100vw-19rem)]"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "#cbd5e1 transparent",
+              }}
+            >
               {loader ? (
                 <Loader />
               ) : error ? (
@@ -312,46 +314,50 @@ const DoctorsPage = () => {
                 <table className="min-w-full bg-white rounded-lg shadow border border-gray-200">
                   <thead className="bg-blue-100 sticky top-0 z-10">
                     <tr className="text-sm text-blue-900">
-                      <th
-                        className="px-6 py-3 text-left font-semibold cursor-pointer"
-                        onClick={() => handleSort("dr_name")}
-                      >
-                        Name {getSortIcon("dr_name")}
-                      </th>
-                      <th
-                        className="px-6 py-3 text-left font-semibold cursor-pointer"
-                        onClick={() => handleSort("speciality")}
-                      >
-                        Specialization {getSortIcon("speciality")}
-                      </th>
-                      <th
-                        className="px-6 py-3 text-left font-semibold cursor-pointer"
-                        onClick={() => handleSort("division")}
-                      >
-                        Division {getSortIcon("division")}
-                      </th>
-                      <th className="px-6 py-3 text-left font-semibold">
-                        Patients
-                      </th>
-                      <th
-                        className="px-6 py-3 text-left font-semibold cursor-pointer"
-                        onClick={() => handleSort("clinic_state")}
-                      >
-                        Clinic State {getSortIcon("clinic_state")}
-                      </th>
-                      <th
-                        className="px-6 py-3 text-left font-semibold cursor-pointer"
-                        onClick={() => handleSort("status")}
-                      >
-                        Availability {getSortIcon("status")}
-                      </th>
+                      {masterDocColumns.map((col) => (
+                        <th
+                          key={col}
+                          className={`px-6 py-3 text-left font-semibold  whitespace-nowrap ${
+                            [
+                              "dr_name",
+                              "speciality",
+                              "division",
+                              "clinic_state",
+                              "status",
+                            ].includes(col)
+                              ? "cursor-pointer"
+                              : ""
+                          }`}
+                          onClick={
+                            [
+                              "dr_name",
+                              "speciality",
+                              "division",
+                              "clinic_state",
+                              "status",
+                            ].includes(col)
+                              ? () => handleSort(col)
+                              : undefined
+                          }
+                        >
+                          {col.replace(/_/g, " ")}
+                          {[
+                            "dr_name",
+                            "speciality",
+                            "division",
+                            "clinic_state",
+                            "status",
+                          ].includes(col) && getSortIcon(col)}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
+
                   <tbody className="text-sm text-gray-700">
                     {doctorData.length === 0 ? (
                       <tr>
                         <td
-                          colSpan="5"
+                          colSpan={masterDocColumns.length}
                           className="text-center py-6 text-gray-500 italic"
                         >
                           No doctors found
@@ -365,24 +371,25 @@ const DoctorsPage = () => {
                             index % 2 === 0 ? "bg-white" : "bg-blue-50"
                           }
                         >
-                          <td className="px-6 py-3">{doctor.dr_name}</td>
-                          <td className="px-6 py-3">{doctor.speciality}</td>
-                          <td className="px-6 py-3">{doctor.division}</td>
-                          <td className="px-6 py-3">
-                            {doctor.no_patients || "—"}
-                          </td>
-                          <td className="px-6 py-3">{doctor.clinic_state}</td>
-                          <td className="px-6 py-3">
-                            {doctor.status === "A" ? (
-                              <span className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
-                                Active
-                              </span>
-                            ) : (
-                              <span className="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
-                                Inactive
-                              </span>
-                            )}
-                          </td>
+                          {masterDocColumns.map((col) => (
+                            <td key={col} className="px-6 py-3">
+                              {col === "status" ? (
+                                doctor.status === "A" ? (
+                                  <span className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
+                                    Active
+                                  </span>
+                                ) : (
+                                  <span className="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
+                                    Inactive
+                                  </span>
+                                )
+                              ) : col === "no_patients" ? (
+                                doctor[col] || "—"
+                              ) : (
+                                doctor[col]
+                              )}
+                            </td>
+                          ))}
                         </tr>
                       ))
                     )}
@@ -668,7 +675,21 @@ const DoctorsPage = () => {
           />
         )}
         {modalType === "add" && (
-          <AddForm onClose={handleClose} onSubmit={handleAdd} />
+          <AddDoctor
+            mode={
+              selectedTab === "master"
+                ? "master"
+                : dbTab === "lloyd-db"
+                ? "selected-lloyd"
+                : "selected-d2c"
+            }
+            onSuccess={() => {
+              handleClose();
+              if (selectedTab === "master") fetchMasterDoctors();
+              else fetchSelectedDoctors();
+            }}
+            onCancel={handleClose}
+          />
         )}
       </Modal>
 
@@ -704,3 +725,5 @@ const DoctorsPage = () => {
 };
 
 export default DoctorsPage;
+
+// TODO: md:max-w-[calc(100vw-19rem)]
