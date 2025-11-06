@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { BiCloudUpload, BiX } from "react-icons/bi";
-import { RxDragHandleDots2 } from "react-icons/rx"; // <-- Added drag icon
+import { RxDragHandleDots2 } from "react-icons/rx"; // <-- drag icon
 
 const ImportForm = ({ onClose, onSubmit, title = "Import Data" }) => {
   const [file, setFile] = useState(null);
