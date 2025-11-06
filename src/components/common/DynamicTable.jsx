@@ -1,8 +1,8 @@
-import React from "react";
 import Loader from "./Loader";
+import { BiSort, BiSortUp, BiSortDown } from "react-icons/bi";
 
 const DynamicTable = ({
-  columns = [], // [{ key: "dr_name", label: "Doctor Name", sortable: true }]
+  columns = [],
   data = [],
   loading = false,
   error = null,
@@ -11,16 +11,22 @@ const DynamicTable = ({
   order = "asc",
   emptyMessage = "No records found",
   responsive = true,
-  renderCell = null, // optional custom renderer
+  renderCell = null,
 }) => {
   const getSortIcon = (field) => {
-    if (sortBy !== field) return "↕️";
-    return order === "asc" ? "⬆️" : "⬇️";
+    if (sortBy !== field) return <BiSort className="inline ml-1 opacity-50" />;
+    return order === "asc" ? (
+      <BiSortUp className="inline ml-1 text-blue-600" />
+    ) : (
+      <BiSortDown className="inline ml-1 text-blue-600" />
+    );
   };
 
   return (
     <div
-      className={`relative w-full ${responsive ? "overflow-x-auto" : ""}`}
+      className={`relative w-full ${
+        responsive ? "overflow-x-auto" : ""
+      } rounded-md border border-gray-200 bg-white shadow-sm`}
       style={{
         scrollbarWidth: "thin",
         scrollbarColor: "#cbd5e1 transparent",
@@ -37,34 +43,32 @@ const DynamicTable = ({
           {emptyMessage}
         </div>
       ) : (
-        <table className="min-w-full table-auto text-sm text-gray-700 hidden md:table">
-          <thead className="bg-blue-100 sticky top-0 z-10">
-            <tr className="text-blue-900">
+        <table className="w-full table-auto text-sm text-gray-700 hidden md:table">
+          <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 sticky top-0 z-10 border-b border-gray-200">
+            <tr>
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`px-6 py-3 text-left font-semibold whitespace-nowrap ${
-                    col.sortable ? "cursor-pointer" : ""
+                  className={`px-5 py-3 text-left font-semibold text-gray-700 uppercase whitespace-nowrap tracking-wide ${
+                    col.sortable ? "cursor-pointer select-none" : ""
                   }`}
                   style={{ width: `${100 / columns.length}%` }}
                   onClick={() => col.sortable && onSort(col.key)}
                 >
-                  {col.label} {col.sortable && getSortIcon(col.key)}
+                  <div className="flex items-center">
+                    {col.label}
+                    {col.sortable && getSortIcon(col.key)}
+                  </div>
                 </th>
               ))}
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-gray-100">
             {data.map((row, index) => (
-              <tr
-                key={index}
-                className={`${
-                  index % 2 === 0 ? "bg-white" : "bg-blue-50"
-                } transition hover:bg-blue-50`}
-              >
+              <tr key={index} className="transition-colors hover:bg-blue-50/50">
                 {columns.map((col) => (
-                  <td key={col.key} className="px-6 py-3">
+                  <td key={col.key} className="px-5 py-3 whitespace-nowrap">
                     {renderCell
                       ? renderCell(col.key, row[col.key], row)
                       : row[col.key] ?? "—"}
@@ -77,17 +81,15 @@ const DynamicTable = ({
       )}
 
       {/* Mobile View */}
-      <div className="space-y-4 md:hidden mt-4">
+      <div className="space-y-3 md:hidden mt-4 px-2">
         {data.map((row, i) => (
           <div
             key={i}
-            className="bg-white border border-gray-200 rounded-md shadow-sm p-4 transition hover:shadow-md"
+            className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 transition hover:shadow-md"
           >
             {columns.map((col) => (
-              <p key={col.key} className="text-sm text-gray-700">
-                <span className="font-semibold text-gray-600">
-                  {col.label}:
-                </span>{" "}
+              <p key={col.key} className="text-sm text-gray-700 mb-1">
+                <span className="font-medium text-gray-600">{col.label}:</span>{" "}
                 {renderCell
                   ? renderCell(col.key, row[col.key], row)
                   : row[col.key] || "—"}
