@@ -112,7 +112,7 @@ const AddDoctor = ({ mode, onSuccess, onCancel }) => {
           {getColumnsForMode().map((col) => (
             <div key={col} className="flex flex-col">
               <label className="text-gray-700 text-sm font-medium">
-                {col.replace(/_/g, " ")}
+                {col.replace(/_/g, " ").toUpperCase()}
                 {requiredFields.includes(col) && (
                   <span className="text-red-500 ml-1">*</span>
                 )}
