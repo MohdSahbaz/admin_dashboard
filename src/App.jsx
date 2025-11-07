@@ -7,6 +7,7 @@ import Camps from "./pages/CampsPage";
 import Users from "./pages/UsersPage";
 import Reports from "./pages/ReportsPage";
 import DoctorsPage from "./pages/DoctorsPage";
+// import DoctorLocation from "./pages/DoctorLocation";
 
 const router = createBrowserRouter([
   { path: "/login", element: <LoginForm /> },
@@ -50,6 +51,14 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  // {
+  //   path: "/doctor-locations",
+  //   element: (
+  //     <ProtectedRoute role={"Admin"}>
+  //       <DoctorLocation />
+  //     </ProtectedRoute>
+  //   ),
+  // },
 ]);
 
 export default function App() {
