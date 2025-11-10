@@ -32,7 +32,7 @@ const DoctorsPage = () => {
   // search and sorting
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [sortBy, setSortBy] = useState("division");
+  const [sortBy, setSortBy] = useState("dr_code");
   const [order, setOrder] = useState("asc");
 
   // page input for manual navigation
@@ -94,6 +94,8 @@ const DoctorsPage = () => {
       // delay tab switch slightly so it doesn't trigger old fetch
       setTimeout(() => setSelectedTab("selected"), 500);
     }
+
+    setSortBy(selectedTab === "master" ? "dr_code" : "doctor_code");
 
     setPage(1);
     setPageInput(1);
@@ -260,6 +262,7 @@ const DoctorsPage = () => {
                 key: col,
                 label: col.replace(/_/g, " ").toUpperCase(),
                 sortable: [
+                  "dr_code",
                   "dr_name",
                   "speciality",
                   "division",
@@ -274,20 +277,20 @@ const DoctorsPage = () => {
               order={order}
               onSort={handleSort}
               renderCell={(key, value, row) => {
-                // Custom cell rendering for specific columns
-                if (key === "status") {
-                  return (
-                    <span
-                      className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                        value === "A"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {value === "A" ? "Active" : "Inactive"}
-                    </span>
-                  );
-                }
+                // // Custom cell rendering for specific columns
+                // if (key === "status") {
+                //   return (
+                //     <span
+                //       className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                //         value === "A"
+                //           ? "bg-green-100 text-green-700"
+                //           : "bg-red-100 text-red-700"
+                //       }`}
+                //     >
+                //       {value === "A" ? "Active" : "Inactive"}
+                //     </span>
+                //   );
+                // }
                 return value || "—";
               }}
             />

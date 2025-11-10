@@ -19,12 +19,13 @@ const PaginationControls = ({
     { value: 30, label: "30 / Page" },
     { value: 40, label: "40 / Page" },
     { value: 50, label: "50 / Page" },
+    { value: 100, label: "100 / Page" },
   ];
 
   if (error !== null || !doctorData || doctorData.length === 0) return null;
 
   return (
-    <div className="w-full mt-8 border border-blue-800 rounded-sm">
+    <div className="w-full mt-8 border border-gray-300 rounded-sm">
       <div className="bg-white border border-gray-200 rounded-md px-5 py-4 flex flex-col gap-5 md:gap-4">
         {/* === Top Row for Go to Page + Rows (Large and Tablet) === */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">

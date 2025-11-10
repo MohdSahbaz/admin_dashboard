@@ -34,7 +34,7 @@ const DashboardLayout = ({ children }) => {
         />
 
         {/* Page content */}
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-2 md:p-6">{children}</main>
       </div>
     </div>
   );

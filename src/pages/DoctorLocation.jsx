@@ -5,61 +5,52 @@ import ImportForm from "../components/common/ImportForm";
 import ExportForm from "../components/common/ExportForm";
 import AddLocation from "../components/location/AddLocation";
 import api from "../api/axios";
-import Loader from "../components/common/Loader";
 import toast from "react-hot-toast";
 import { BiDownload, BiPlus, BiUpload } from "react-icons/bi";
 import FilterMasterLocation from "../components/location/FilterMasterLocation";
-import FilterSelectedLocation from "../components/location/FilterSelectedLocation";
 import { masterLocationColumns } from "../config/locationColumns";
 import PaginationControls from "../components/common/PaginationControls";
 import HeaderSection from "../components/common/HeaderSection";
 import DynamicTable from "../components/common/DynamicTable";
 
 const DoctorLocation = () => {
-  const [selectedTab, setSelectedTab] = useState("master");
-  const [dbTab, setDBTab] = useState("d2c");
-
   const [modalType, setModalType] = useState(null);
   const [locationData, setLocationData] = useState([]);
   const [loader, setLoader] = useState(false);
   const [error, setError] = useState(null);
 
-  // pagination
+  // Pagination
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
 
-  // search & sort
+  // Search & sorting
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [sortBy, setSortBy] = useState("city");
+  const [sortBy, setSortBy] = useState("dr_code");
   const [order, setOrder] = useState("asc");
 
   const [pageInput, setPageInput] = useState("");
 
-  // Master filters
-  const [masterState, setMasterState] = useState("");
-  const [masterDivision, setMasterDivision] = useState("");
-
-  // Selected filters
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedDivision, setSelectedDivision] = useState("");
+  // Filters
+  const [filterState, setFilterState] = useState("");
+  const [filterDivision, setFilterDivision] = useState("");
   const [showFilter, setShowFilter] = useState(false);
 
   const handleClose = () => setModalType(null);
 
-  // debounce search
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 500);
     return () => clearTimeout(timer);
   }, [search]);
 
-  // fetch master locations
+  // Fetch master locations
   const fetchMasterLocations = async () => {
     setLoader(true);
     setError(null);
     try {
-      const url = `/admin/master-locations?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}&division=${masterDivision}&state=${masterState}`;
+      const url = `/admin/master-locations?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}&division=${filterDivision}&state=${filterState}`;
       const res = await api.get(url);
       setLocationData(res.data.data || []);
       setTotal(res.data.total || 0);
@@ -70,43 +61,19 @@ const DoctorLocation = () => {
     }
   };
 
-  // fetch selected locations
-  const fetchSelectedLocations = async () => {
-    setLoader(true);
-    setError(null);
-    try {
-      const url = `/admin/selected-locations?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}&db=${dbTab}&division=${selectedDivision}&state=${selectedState}`;
-      const res = await api.get(url);
-      setLocationData(res.data.data || []);
-      setTotal(res.data.total || 0);
-    } catch {
-      setError("Failed to fetch selected locations");
-    } finally {
-      setLoader(false);
-    }
-  };
-
-  // handle db change or tab switch
   useEffect(() => {
-    setLoader(true);
-    if (dbTab === "lloyd-db") {
-      setTimeout(() => setSelectedTab("selected"), 500);
-    }
-    setPage(1);
-    setPageInput(1);
-    setSearch("");
-  }, [dbTab, selectedTab]);
+    fetchMasterLocations();
+  }, [
+    page,
+    limit,
+    debouncedSearch,
+    sortBy,
+    order,
+    filterDivision,
+    filterState,
+  ]);
 
-  // main data fetch
-  useEffect(() => {
-    if (!selectedTab) return;
-    setLocationData([]);
-    setLoader(true);
-    if (selectedTab === "master") fetchMasterLocations();
-    else fetchSelectedLocations();
-  }, [selectedTab, page, limit, debouncedSearch, sortBy, order, dbTab]);
-
-  // sorting toggle
+  // Sorting toggle
   const handleSort = (field) => {
     if (sortBy === field) setOrder(order === "asc" ? "desc" : "asc");
     else {
@@ -115,23 +82,21 @@ const DoctorLocation = () => {
     }
   };
 
-  // import handler
+  // Import Handler
   const handleImport = async (file) => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const url = `/admin/import-locations?db=${dbTab}&type=${selectedTab}`;
+      const url = `/admin/import-locations?db=d2c&type=master`;
+
       const res = await api.post(url, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       toast.success(
-        `${res?.data?.message} \n Inserted: ${res.data.inserted} data`
+        `${res?.data?.message}\nInserted: ${res.data.inserted} records`
       );
-
-      setLoader(true);
-      if (selectedTab === "master") fetchMasterLocations();
-      else fetchSelectedLocations();
+      fetchMasterLocations();
     } catch (error) {
       toast.error(
         "Import failed: " + (error.response?.data?.message || error.message)
@@ -139,14 +104,11 @@ const DoctorLocation = () => {
     }
   };
 
-  // export handler
+  // Export Handler
   const handleExport = async (format, paginationData = null) => {
     try {
       const exportFormat = format === "excel" ? "xlsx" : format;
-      let query =
-        selectedTab === "master"
-          ? `/admin/export-master-locations?format=${exportFormat}`
-          : `/admin/export-selected-locations?format=${exportFormat}&db=${dbTab}`;
+      let query = `/admin/export-master-locations?format=${exportFormat}`;
 
       if (paginationData && paginationData.offset && paginationData.limit) {
         query += `&offset=${paginationData.offset}&limit=${paginationData.limit}`;
@@ -154,20 +116,19 @@ const DoctorLocation = () => {
 
       const response = await api.get(query, { responseType: "blob" });
       const disposition = response.headers["content-disposition"];
-      let filename = "locations." + exportFormat;
-
+      let filename = `locations-d2c.${exportFormat}`;
       if (disposition && disposition.includes("filename=")) {
         filename = disposition.split("filename=")[1].replace(/"/g, "");
       }
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
-      link.href = url;
+      link.href = blobUrl;
       link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
 
       toast.success("Export successful!");
     } catch {
@@ -185,11 +146,9 @@ const DoctorLocation = () => {
           title="Locations"
           showTotal
           total={total}
-          tabs={["master", "selected"].filter(
-            (tab) => !(dbTab === "lloyd-db" && tab === "master")
-          )}
-          selectedTab={selectedTab}
-          onTabChange={setSelectedTab}
+          tabs={["master"]}
+          selectedTab="master"
+          onTabChange={() => {}}
           actions={[
             {
               label: "Import",
@@ -216,71 +175,29 @@ const DoctorLocation = () => {
             },
           ]}
           showSearch
-          searchPlaceholder={`Search locations by ${
-            selectedTab === "master"
-              ? "city, state, or division..."
-              : "code, division, or state..."
-          }`}
+          searchPlaceholder="Search locations by dr_code or division..."
           searchValue={search}
           onSearchChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
           }}
-          showDatabaseSelect
-          dbValue={dbTab}
-          onDbChange={setDBTab}
-          databases={[
-            { label: "D2C", value: "d2c" },
-            { label: "Lloyd DB", value: "lloyd-db" },
-          ]}
         />
 
         {/* Master Table */}
-        {selectedTab === "master" ? (
-          <DynamicTable
-            columns={masterLocationColumns.map((col) => ({
-              key: col,
-              label: col.replace(/_/g, " ").toUpperCase(),
-              sortable: ["city", "state", "division"].includes(col),
-            }))}
-            data={locationData}
-            loading={loader}
-            error={error}
-            sortBy={sortBy}
-            order={order}
-            onSort={handleSort}
-            renderCell={(key, value) => value || "—"}
-          />
-        ) : (
-          // Selected Table
-          <div className="overflow-x-auto block md:max-w-[calc(100vw-19rem)]">
-            {loader ? (
-              <Loader />
-            ) : error ? (
-              <div className="text-center py-6 text-red-600">{error}</div>
-            ) : (
-              <DynamicTable
-                columns={[
-                  {
-                    key: "location_code",
-                    label: "LOCATION CODE",
-                    sortable: true,
-                  },
-                  { key: "division", label: "DIVISION", sortable: true },
-                  ...(dbTab === "lloyd-db"
-                    ? [{ key: "state", label: "STATE", sortable: true }]
-                    : []),
-                ]}
-                data={locationData}
-                loading={loader}
-                error={error}
-                sortBy={sortBy}
-                order={order}
-                onSort={handleSort}
-              />
-            )}
-          </div>
-        )}
+        <DynamicTable
+          columns={masterLocationColumns.map((col) => ({
+            key: col,
+            label: col.replace(/_/g, " ").toUpperCase(),
+            sortable: ["dr_code", "division"].includes(col),
+          }))}
+          data={locationData}
+          loading={loader}
+          error={error}
+          sortBy={sortBy}
+          order={order}
+          onSort={handleSort}
+          renderCell={(key, value) => value || "—"}
+        />
 
         {/* Pagination */}
         <PaginationControls
@@ -302,29 +219,22 @@ const DoctorLocation = () => {
           <ImportForm
             onClose={handleClose}
             onSubmit={handleImport}
-            title="Import Location Data"
+            title="Import Location Data (D2C)"
           />
         )}
         {modalType === "export" && (
           <ExportForm
             onClose={handleClose}
             onSubmit={handleExport}
-            title="Export Location Data"
+            title="Export Location Data (D2C)"
           />
         )}
         {modalType === "add" && (
           <AddLocation
-            mode={
-              selectedTab === "master"
-                ? "master"
-                : dbTab === "lloyd-db"
-                ? "selected-lloyd"
-                : "selected-d2c"
-            }
+            mode="master"
             onSuccess={() => {
               handleClose();
-              if (selectedTab === "master") fetchMasterLocations();
-              else fetchSelectedLocations();
+              fetchMasterLocations();
             }}
             onCancel={handleClose}
           />
@@ -332,30 +242,14 @@ const DoctorLocation = () => {
       </Modal>
 
       {/* Filter */}
-      {showFilter && selectedTab === "master" && (
+      {showFilter && (
         <FilterMasterLocation
-          filterDivision={masterDivision}
-          setFilterDivision={setMasterDivision}
-          filterState={masterState}
-          setFilterState={setMasterState}
+          filterDivision={filterDivision}
+          setFilterDivision={setFilterDivision}
+          filterState={filterState}
+          setFilterState={setFilterState}
           setShowFilter={setShowFilter}
           fetchMasterLocations={fetchMasterLocations}
-        />
-      )}
-
-      {showFilter && selectedTab === "selected" && (
-        <FilterSelectedLocation
-          dbTab={dbTab}
-          filterDivision={selectedDivision}
-          setFilterDivision={setSelectedDivision}
-          filterState={selectedState}
-          setFilterState={setSelectedState}
-          close={() => setShowFilter(false)}
-          apply={() => {
-            setPage(1);
-            fetchSelectedLocations();
-            setShowFilter(false);
-          }}
         />
       )}
     </DashboardLayout>

@@ -4,54 +4,38 @@ import Select from "react-select";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
 
-const FilterMasterDoc = ({
+const FilterMasterLocation = ({
   filterDivision,
   setFilterDivision,
-  filterSpeciality,
-  setFilterSpeciality,
   setShowFilter,
-  fetchMasterDoctors,
+  fetchMasterLocations,
 }) => {
   const [divisionList, setDivisionList] = useState([]);
-  const [specialityList, setSpecialityList] = useState([]);
-
   const [exportFormat, setExportFormat] = useState("csv");
   const [isExporting, setIsExporting] = useState(false);
 
+  // Fetch divisions on mount
   useEffect(() => {
     fetchDivisions();
-    fetchSpecialities();
   }, []);
 
   const fetchDivisions = async () => {
     try {
-      const res = await api.get("/admin/get-all-divisions");
+      const res = await api.get(`/admin/get-all-location-divisions`);
       setDivisionList(res.data.data || []);
     } catch (err) {
       toast.error("Failed to fetch divisions");
     }
   };
 
-  const fetchSpecialities = async () => {
-    try {
-      const res = await api.get("/admin/get-all-specialities");
-      setSpecialityList(res.data.data || []);
-    } catch (err) {
-      toast.error("Failed to fetch specialities");
-    }
-  };
-
   const handleClear = () => {
     setFilterDivision("");
-    setFilterSpeciality("");
   };
 
   const handleFilteredExport = async () => {
     try {
-      if (!filterDivision && !filterSpeciality) {
-        return toast.error(
-          "Please select at least one filter before exporting."
-        );
+      if (!filterDivision) {
+        return toast.error("Please select a division before exporting.");
       }
 
       setIsExporting(true);
@@ -60,20 +44,19 @@ const FilterMasterDoc = ({
       const params = new URLSearchParams({
         format,
         division: filterDivision || "",
-        speciality: filterSpeciality || "",
       });
 
-      const url = `/admin/export-doctors?${params.toString()}`;
+      const url = `/admin/export-master-locations?${params.toString()}`;
       const response = await api.get(url, { responseType: "blob" });
 
-      // ✅ Extract filename
+      // Extract filename
       const disposition = response.headers["content-disposition"];
-      let filename = "filtered_export." + format;
+      let filename = `filtered_locations.${format}`;
       if (disposition && disposition.includes("filename=")) {
         filename = disposition.split("filename=")[1].replace(/"/g, "");
       }
 
-      // ✅ Download the file
+      // Download
       const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = blobUrl;
@@ -83,9 +66,9 @@ const FilterMasterDoc = ({
       link.remove();
       window.URL.revokeObjectURL(blobUrl);
 
-      toast.success("Filtered data exported successfully!");
-    } catch (error) {
-      console.error(error);
+      toast.success("Filtered location data exported successfully!");
+    } catch (err) {
+      console.error(err);
       toast.error("Export failed. Please try again.");
     } finally {
       setIsExporting(false);
@@ -104,7 +87,7 @@ const FilterMasterDoc = ({
         </button>
 
         <h3 className="text-xl font-semibold text-gray-800 text-center">
-          Filter & Export Doctors
+          Filter & Export Locations (D2C)
         </h3>
 
         {/* Division */}
@@ -125,31 +108,6 @@ const FilterMasterDoc = ({
             onChange={(e) => setFilterDivision(e?.value || "")}
             options={divisionList.map((d) => ({ label: d, value: d }))}
             placeholder="Select Division"
-            isSearchable
-            className="text-sm"
-          />
-        </div>
-
-        {/* Speciality */}
-        <div
-          className="space-y-1"
-          style={{
-            scrollbarWidth: "thin",
-            scrollbarColor: "#cbd5e1 transparent",
-          }}
-        >
-          <label className="text-gray-700 text-sm font-medium">
-            Speciality
-          </label>
-          <Select
-            value={
-              filterSpeciality
-                ? { label: filterSpeciality, value: filterSpeciality }
-                : null
-            }
-            onChange={(e) => setFilterSpeciality(e?.value || "")}
-            options={specialityList.map((s) => ({ label: s, value: s }))}
-            placeholder="Select Speciality"
             isSearchable
             className="text-sm"
           />
@@ -207,7 +165,7 @@ const FilterMasterDoc = ({
           </button>
         </div>
 
-        {/* Filter Buttons */}
+        {/* Buttons */}
         <div className="grid grid-cols-3 gap-2 pt-2">
           <button
             onClick={handleClear}
@@ -224,7 +182,7 @@ const FilterMasterDoc = ({
           <button
             onClick={() => {
               setShowFilter(false);
-              fetchMasterDoctors();
+              fetchMasterLocations();
             }}
             className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
           >
@@ -236,4 +194,4 @@ const FilterMasterDoc = ({
   );
 };
 
-export default FilterMasterDoc;
+export default FilterMasterLocation;

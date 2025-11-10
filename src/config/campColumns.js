@@ -1,7 +1,6 @@
 // All columns in your table (keep this list in same order as DB)
 // MASTER DOCTOR COLUMNS (common for both DBs)
-const masterCampColumns = [
-  // "id",
+const masterCampColumnsD2C = [
   "dr_code",
   "plandate",
   "plantime",
@@ -30,14 +29,30 @@ const masterCampColumns = [
   "strips_used",
 ];
 
-// SELECTED DOCTOR COLUMNS FOR D2C DB
-const selectedCampD2CDbColumns = [...masterCampColumns];
+const masterCampColumnsLloyd = [
+  "dr_code",
+  "plandate",
+  "plantime",
+  "location",
+  "state",
+  "city",
+  "plantype",
+  "statuscode",
+  "assignto",
+  "remark",
+  "approveby",
+  "approvon",
+  "createdby",
+  "createdon",
+  "modifyby",
+  "modifyon",
+  "isactive",
+  "longitude",
+  "latitude",
+  "hq",
+  "attendedby",
+  "epochdate",
+  "planwith",
+];
 
-// SELECTED DOCTOR COLUMNS FOR LLOYD DB
-const selectedCampLloydDbColumns = [...masterCampColumns];
-
-export {
-  masterCampColumns,
-  selectedCampD2CDbColumns,
-  selectedCampLloydDbColumns,
-};
+export { masterCampColumnsD2C, masterCampColumnsLloyd };

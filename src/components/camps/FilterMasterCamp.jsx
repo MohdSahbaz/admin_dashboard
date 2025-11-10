@@ -20,9 +20,10 @@ const FilterMasterCamp = ({
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
+    if (!dbTab) return;
     fetchDivisions();
     fetchStates();
-  }, [dbTab]);
+  }, [dbTab, setShowFilter]);
 
   const fetchDivisions = async () => {
     try {
@@ -117,11 +118,7 @@ const FilterMasterCamp = ({
         >
           <label className="text-gray-700 text-sm font-medium">Plan Type</label>
           <Select
-            value={
-              filterType
-                ? { label: filterType, value: filterType }
-                : null
-            }
+            value={filterType ? { label: filterType, value: filterType } : null}
             onChange={(e) => setFilterType(e?.value || "")}
             options={divisionList.map((d) => ({ label: d, value: d }))}
             placeholder="Select Plan Type"

@@ -9,7 +9,10 @@ import Loader from "../components/common/Loader";
 import toast from "react-hot-toast";
 import { BiDownload, BiPlus, BiUpload } from "react-icons/bi";
 import FilterMasterCamp from "../components/camps/FilterMasterCamp";
-import { masterCampColumns } from "../config/campColumns";
+import {
+  masterCampColumnsD2C,
+  masterCampColumnsLloyd,
+} from "../config/campColumns";
 import PaginationControls from "../components/common/PaginationControls";
 import HeaderSection from "../components/common/HeaderSection";
 import DynamicTable from "../components/common/DynamicTable";
@@ -30,7 +33,7 @@ const CampsPage = () => {
   // search and sorting
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [sortBy, setSortBy] = useState("plandate");
+  const [sortBy, setSortBy] = useState("dr_code");
   const [order, setOrder] = useState("asc");
 
   const [pageInput, setPageInput] = useState("");
@@ -206,7 +209,10 @@ const CampsPage = () => {
 
         {/* Master Table */}
         <DynamicTable
-          columns={masterCampColumns.map((col) => ({
+          columns={(dbTab === "d2c"
+            ? masterCampColumnsD2C
+            : masterCampColumnsLloyd
+          ).map((col) => ({
             key: col,
             label: col.replace(/_/g, " ").toUpperCase(),
             sortable: [
@@ -272,6 +278,7 @@ const CampsPage = () => {
       {/* Filter */}
       {showFilter && (
         <FilterMasterCamp
+          key={dbTab}
           dbTab={dbTab}
           filterType={masterDivision}
           setFilterType={setMasterDivision}

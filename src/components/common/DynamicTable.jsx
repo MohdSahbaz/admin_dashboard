@@ -66,7 +66,10 @@ const DynamicTable = ({
 
           <tbody className="divide-y divide-gray-100">
             {data.map((row, index) => (
-              <tr key={index} className="transition-colors hover:bg-blue-50/50">
+              <tr
+                key={index}
+                className="hover:bg-blue-200 transition-all duration-300"
+              >
                 {columns.map((col) => (
                   <td key={col.key} className="px-5 py-3 whitespace-nowrap">
                     {renderCell

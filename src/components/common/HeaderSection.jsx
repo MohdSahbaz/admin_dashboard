@@ -6,7 +6,7 @@ import { FaDatabase } from "react-icons/fa6";
  *
  * Props:
  * - title: string → Page title (e.g. "Doctors")
- * - total: number → total count (optional)
+ * - total: number → total count
  * - tabs: array → list of tab names (optional)
  * - selectedTab: string → currently active tab
  * - onTabChange: function(tabName)
@@ -38,17 +38,15 @@ const HeaderSection = ({
   databases = [],
 }) => {
   return (
-    <div className="w-full p-6 bg-white dark:bg-white text-black rounded-md border border-gray-100 dark:border-blue-800 transition">
+    <div className="w-full p-6 bg-white dark:bg-white text-black rounded-md border border-gray-100 dark:border-gray-300 transition">
       {/* === Title & Tabs === */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <h2 className="text-2xl font-bold text-blue-800">{title}</h2>
-
+        <div>
+          <h1 className="text-2xl font-bold text-blue-800">{title}</h1>
           {showTotal && (
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-700 bg-gray-100 dark:bg-gray-200 px-3 py-1 rounded-sm">
-              Total:{" "}
-              <span className="font-semibold text-blue-700">{total}</span>
-            </span>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Total: <span className="font-medium text-blue-600">{total}</span>
+            </p>
           )}
         </div>
 

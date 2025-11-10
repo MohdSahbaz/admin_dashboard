@@ -1,22 +1,34 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { MdDashboard, MdLogout } from "react-icons/md";
-import { GiHospitalCross } from "react-icons/gi";
-import { GiCampingTent } from "react-icons/gi";
+import { MdDashboard, MdLogout, MdKeyboardArrowDown } from "react-icons/md";
+import { GiHospitalCross, GiCampingTent } from "react-icons/gi";
 import { FaUserDoctor } from "react-icons/fa6";
 import { HiMiniUsers } from "react-icons/hi2";
 import { BiSolidReport } from "react-icons/bi";
 import { FiMapPin } from "react-icons/fi";
 
 const Sidebar = ({ onLogout, open, onClose }) => {
+  const [openSections, setOpenSections] = useState({
+    main: true,
+    management: true,
+    reports: true,
+  });
+
+  const toggleSection = (section) =>
+    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+
   const linkClass = ({ isActive }) =>
-    `flex items-center px-4 py-2 rounded-md transition-colors ${
+    `relative flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 group
+    ${
       isActive
-        ? "bg-blue-100 text-blue-800"
-        : "text-gray-600 hover:bg-blue-50 hover:text-blue-800"
+        ? "bg-blue-50 text-blue-800 font-semibold shadow-sm"
+        : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"
     }`;
 
   const iconClass = (isActive) =>
-    `h-5 w-5 mr-3 ${isActive ? "text-blue-500" : "text-gray-400"}`;
+    `h-5 w-5 mr-3 transition-colors duration-200 ${
+      isActive ? "text-blue-600" : "text-gray-400 group-hover:text-blue-600"
+    }`;
 
   return (
     <>
@@ -32,81 +44,169 @@ const Sidebar = ({ onLogout, open, onClose }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:static h-screen inset-y-0 left-0 z-50 w-64 bg-white text-gray-700 flex flex-col justify-between transform transition-transform duration-300 ease-in-out ${
-          open ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 shadow-lg`}
+        className={`fixed md:static h-screen inset-y-0 left-0 z-50 w-64 bg-white flex flex-col justify-between transform transition-transform duration-300 ease-in-out
+          ${
+            open ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 shadow-lg border-r border-gray-200`}
       >
-        {/* Header / Logo */}
-        <div className="flex items-center px-7 h-20 border-b border-gray-200">
-          {/* <img src={MdLogoDev} className="h-12 w-12" /> */}
-          <GiHospitalCross className="h-8 w-8 text-blue-700" />
-          <span className="text-xl font-bold ml-2 text-blue-800">Lloyd</span>
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-6 h-20 border-b border-gray-200">
+          <div className="p-2 rounded-md bg-blue-100">
+            <GiHospitalCross className="h-7 w-7 text-blue-700" />
+          </div>
+          <span className="text-xl font-bold text-blue-800 tracking-tight">
+            Lloyd
+          </span>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          <NavLink to="/" className={linkClass} end>
-            {({ isActive }) => (
-              <>
-                <MdDashboard className={iconClass(isActive)} />
-                Dashboard
-              </>
-            )}
-          </NavLink>
+        <nav className="flex-1 overflow-y-auto px-4 py-5 space-y-4">
+          {/* --- MAIN SECTION --- */}
+          <div>
+            <button
+              onClick={() => toggleSection("main")}
+              className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold uppercase text-gray-500 hover:text-blue-700 transition"
+            >
+              <span>Main</span>
+              <MdKeyboardArrowDown
+                className={`h-4 w-4 transition-transform duration-200 ${
+                  openSections.main ? "rotate-0" : "-rotate-90"
+                }`}
+              />
+            </button>
+            <div
+              className={`overflow-hidden transition-all duration-300 ${
+                openSections.main ? "max-h-40" : "max-h-0"
+              }`}
+            >
+              <div className="space-y-1 pl-1">
+                <NavLink to="/" className={linkClass} end>
+                  {({ isActive }) => (
+                    <>
+                      <MdDashboard className={iconClass(isActive)} />
+                      Dashboard
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
 
-          <NavLink to="/doctors" className={linkClass}>
-            {({ isActive }) => (
-              <>
-                <FaUserDoctor className={iconClass(isActive)} />
-                Doctors
-              </>
-            )}
-          </NavLink>
+                <NavLink to="/doctors" className={linkClass}>
+                  {({ isActive }) => (
+                    <>
+                      <FaUserDoctor className={iconClass(isActive)} />
+                      Doctors
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
 
-          <NavLink to="/camps" className={linkClass}>
-            {({ isActive }) => (
-              <>
-                <GiCampingTent className={iconClass(isActive)} />
-                Camps
-              </>
-            )}
-          </NavLink>
+                <NavLink to="/camps" className={linkClass}>
+                  {({ isActive }) => (
+                    <>
+                      <GiCampingTent className={iconClass(isActive)} />
+                      Camps
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              </div>
+            </div>
+          </div>
 
-          <NavLink to="/users" className={linkClass}>
-            {({ isActive }) => (
-              <>
-                <HiMiniUsers className={iconClass(isActive)} />
-                Users
-              </>
-            )}
-          </NavLink>
+          {/* --- MANAGEMENT SECTION --- */}
+          <div>
+            <button
+              onClick={() => toggleSection("management")}
+              className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold uppercase text-gray-500 hover:text-blue-700 transition"
+            >
+              <span>Management</span>
+              <MdKeyboardArrowDown
+                className={`h-4 w-4 transition-transform duration-200 ${
+                  openSections.management ? "rotate-0" : "-rotate-90"
+                }`}
+              />
+            </button>
+            <div
+              className={`overflow-hidden transition-all duration-300 ${
+                openSections.management ? "max-h-32" : "max-h-0"
+              }`}
+            >
+              <div className="space-y-1 pl-1">
+                <NavLink to="/users" className={linkClass}>
+                  {({ isActive }) => (
+                    <>
+                      <HiMiniUsers className={iconClass(isActive)} />
+                      Users
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
 
-          <NavLink to="/reports" className={linkClass}>
-            {({ isActive }) => (
-              <>
-                <BiSolidReport className={iconClass(isActive)} />
-                Reports
-              </>
-            )}
-          </NavLink>
+                <NavLink to="/doctor-locations" className={linkClass}>
+                  {({ isActive }) => (
+                    <>
+                      <FiMapPin className={iconClass(isActive)} />
+                      Doctor Locations
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              </div>
+            </div>
+          </div>
 
-          <NavLink to="/doctor-locations" className={linkClass}>
-            {({ isActive }) => (
-              <>
-                <FiMapPin className={iconClass(isActive)} />
-                Doctor Locations
-              </>
-            )}
-          </NavLink>
+          {/* --- REPORTS SECTION --- */}
+          <div>
+            <button
+              onClick={() => toggleSection("reports")}
+              className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold uppercase text-gray-500 hover:text-blue-700 transition"
+            >
+              <span>Reports</span>
+              <MdKeyboardArrowDown
+                className={`h-4 w-4 transition-transform duration-200 ${
+                  openSections.reports ? "rotate-0" : "-rotate-90"
+                }`}
+              />
+            </button>
+            <div
+              className={`overflow-hidden transition-all duration-300 ${
+                openSections.reports ? "max-h-20" : "max-h-0"
+              }`}
+            >
+              <div className="space-y-1 pl-1">
+                <NavLink to="/reports" className={linkClass}>
+                  {({ isActive }) => (
+                    <>
+                      <BiSolidReport className={iconClass(isActive)} />
+                      Reports
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              </div>
+            </div>
+          </div>
         </nav>
 
         {/* Logout */}
         <div className="border-t border-gray-200">
           <button
             onClick={onLogout}
-            className="flex items-center cursor-pointer w-full px-4 py-3 text-gray-600 hover:bg-red-100 hover:text-red-600 transition-colors"
+            className="w-full cursor-pointer flex items-center px-4 py-3 text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200 font-medium"
           >
-            <MdLogout className="h-5 w-5 mr-3" />
+            <MdLogout className="h-5 w-5 mr-3 text-gray-400 group-hover:text-red-600" />
             Logout
           </button>
         </div>
