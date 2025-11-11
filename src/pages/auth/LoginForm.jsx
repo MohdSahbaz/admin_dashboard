@@ -50,13 +50,13 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-sky-100 to-blue-200 relative overflow-hidden">
+    <div className="min-h-screen px-2 flex items-center justify-center bg-gradient-to-br from-blue-50 via-sky-100 to-blue-200 relative overflow-hidden">
       {/* Animated floating light blobs */}
       <div className="absolute top-[-100px] left-[-100px] w-96 h-96 bg-sky-200 rounded-full blur-3xl opacity-40 animate-pulse"></div>
       <div className="absolute bottom-[-100px] right-[-100px] w-96 h-96 bg-blue-300 rounded-full blur-3xl opacity-30 animate-pulse delay-700"></div>
 
       {/* Card */}
-      <div className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-lg border border-white/30 rounded-2xl shadow-[0_10px_50px_rgba(0,0,0,0.05)] p-10 text-center">
+      <div className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-lg border border-white/30 rounded-md shadow-[0_10px_50px_rgba(0,0,0,0.05)] p-10 text-center">
         {/* Logo Section */}
         <div className="relative mb-8 flex justify-center">
           <div className="absolute w-28 h-28 bg-gradient-to-tr from-sky-200 via-blue-300 to-blue-500 blur-2xl rounded-full opacity-70 animate-[pulse_4s_ease-in-out_infinite]"></div>
@@ -91,7 +91,7 @@ const LoginForm = () => {
               onChange={handleOnChange}
               placeholder="Email address"
               required
-              className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition"
+              className="w-full pl-10 pr-3 py-3 border border-gray-400 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition"
             />
           </div>
 
@@ -106,7 +106,7 @@ const LoginForm = () => {
               onChange={handleOnChange}
               placeholder="Password"
               required
-              className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition"
+              className="w-full pl-10 pr-10 py-3 border border-gray-400 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition"
             />
             <button
               type="button"
@@ -134,7 +134,7 @@ const LoginForm = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 ${
+            className={`w-full py-3 cursor-pointer rounded-md font-semibold text-white transition-all duration-300 ${
               loading
                 ? "bg-sky-300 cursor-not-allowed"
                 : "bg-gradient-to-r from-sky-500 to-blue-500 hover:scale-[1.02] hover:shadow-lg"
