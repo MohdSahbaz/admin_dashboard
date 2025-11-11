@@ -11,7 +11,7 @@ const skipFields = [];
 // Required fields for validation
 const requiredFields = ["dr_code", "division", "lat", "long"];
 
-const AddLocation = ({ mode = "master", onSuccess, onCancel }) => {
+const AddLocation = ({ mode = "master", db = "d2c", onSuccess, onCancel }) => {
   // Initialize form state
   const [form, setForm] = useState(
     Object.fromEntries(
@@ -37,7 +37,7 @@ const AddLocation = ({ mode = "master", onSuccess, onCancel }) => {
     }
 
     try {
-      const url = `/admin/add-location`;
+      const url = `/admin/add-location?db=${db}`;
       await api.post(url, form);
       toast.success("Location added successfully!");
       onSuccess?.();

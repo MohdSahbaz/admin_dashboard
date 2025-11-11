@@ -6,12 +6,14 @@ import { FaUserDoctor } from "react-icons/fa6";
 import { HiMiniUsers } from "react-icons/hi2";
 import { BiSolidReport } from "react-icons/bi";
 import { FiMapPin } from "react-icons/fi";
+import logo from "../../src/assets/logo.png";
 
 const Sidebar = ({ onLogout, open, onClose }) => {
   const [openSections, setOpenSections] = useState({
     main: true,
     management: true,
     reports: true,
+    database: true,
   });
 
   const toggleSection = (section) =>
@@ -51,8 +53,16 @@ const Sidebar = ({ onLogout, open, onClose }) => {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-6 h-20 border-b border-gray-200">
-          <div className="p-2 rounded-md bg-blue-100">
-            <GiHospitalCross className="h-7 w-7 text-blue-700" />
+          <div className="p-2 rounded-md shadow-sm">
+            {/* <GiHospitalCross className="h-7 w-7 text-blue-700" /> */}
+            <img
+              src={
+                logo ||
+                "https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png"
+              }
+              alt="Lloyd Logo"
+              className="relative z-10 h-10 drop-shadow-md"
+            />
           </div>
           <span className="text-xl font-bold text-blue-800 tracking-tight">
             Lloyd
@@ -189,6 +199,64 @@ const Sidebar = ({ onLogout, open, onClose }) => {
                     <>
                       <BiSolidReport className={iconClass(isActive)} />
                       Reports
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              </div>
+            </div>
+          </div>
+
+          {/* --- DATABASE SECTION --- */}
+          <div>
+            <button
+              onClick={() => toggleSection("database")}
+              className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold uppercase text-gray-500 hover:text-blue-700 transition"
+            >
+              <span>Database</span>
+              <MdKeyboardArrowDown
+                className={`h-4 w-4 transition-transform duration-200 ${
+                  openSections.database ? "rotate-0" : "-rotate-90"
+                }`}
+              />
+            </button>
+            <div
+              className={`overflow-hidden transition-all duration-300 ${
+                openSections.database ? "max-h-40" : "max-h-0"
+              }`}
+            >
+              <div className="space-y-1 pl-1">
+                {/* <NavLink to="/db-queries" className={linkClass}>
+                  {({ isActive }) => (
+                    <>
+                      <BiSolidReport className={iconClass(isActive)} />
+                      Run Queries
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+
+                <NavLink to="/query-history" className={linkClass}>
+                  {({ isActive }) => (
+                    <>
+                      <FiMapPin className={iconClass(isActive)} />
+                      Query History
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink> */}
+
+                <NavLink to="/db-console" className={linkClass}>
+                  {({ isActive }) => (
+                    <>
+                      <BiSolidReport className={iconClass(isActive)} />
+                      DB Console
                       {isActive && (
                         <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
                       )}

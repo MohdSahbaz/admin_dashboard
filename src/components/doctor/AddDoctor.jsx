@@ -96,8 +96,9 @@ const AddDoctor = ({ mode, onSuccess, onCancel }) => {
       toast.success("Doctor added successfully!");
       onSuccess?.();
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to add doctor. Check console for details.");
+      toast.error(
+        "Failed to add doctor: " + (err.response?.data?.message || err.message)
+      );
     }
   };
 

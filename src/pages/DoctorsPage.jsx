@@ -99,6 +99,10 @@ const DoctorsPage = () => {
 
     setPage(1);
     setPageInput(1);
+    setMasterDivision("");
+    setMasterSpeciality("");
+    setSelectedDivision("");
+    setSelectedDrType("");
     setSearch("");
   }, [dbTab, selectedTab]);
 
@@ -137,7 +141,9 @@ const DoctorsPage = () => {
       });
 
       toast.success(
-        `${res?.data?.message} \n Inserted: ${res.data.inserted} data`
+        `${res?.data?.message}\nInserted: ${res.data.inserted} records${
+          res.data.skipped ? `\nSkipped: ${res.data.skipped} duplicates` : ""
+        }`
       );
 
       setLoader(true);

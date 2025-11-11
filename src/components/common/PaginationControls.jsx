@@ -50,7 +50,7 @@ const PaginationControls = ({
                   setPage(target);
                 }
               }}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
+              className="px-3 py-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
             >
               Go
             </button>
@@ -75,6 +75,7 @@ const PaginationControls = ({
                 styles={{
                   control: (base) => ({
                     ...base,
+                    cursor: "pointer",
                     borderRadius: "0.5rem",
                     borderColor: "#d1d5db",
                     minHeight: "36px",
@@ -106,7 +107,7 @@ const PaginationControls = ({
               <button
                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                 disabled={page === 1}
-                className="flex items-center justify-center gap-1 px-5 py-2 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium disabled:opacity-50 transition"
+                className="flex items-center cursor-pointer justify-center gap-1 px-5 py-2 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium disabled:opacity-50 transition"
               >
                 <BiChevronLeft className="text-lg" /> Prev
               </button>
@@ -124,7 +125,7 @@ const PaginationControls = ({
               <button
                 onClick={() => setPage((prev) => prev + 1)}
                 disabled={page === totalPages}
-                className="flex items-center justify-center gap-1 px-5 py-2 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium disabled:opacity-50 transition"
+                className="flex items-center cursor-pointer justify-center gap-1 px-5 py-2 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium disabled:opacity-50 transition"
               >
                 Next <BiChevronRight className="text-lg" />
               </button>

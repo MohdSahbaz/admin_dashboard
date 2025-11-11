@@ -39,7 +39,7 @@ const CampsPage = () => {
   const [pageInput, setPageInput] = useState("");
 
   // Filters
-  const [masterDivision, setMasterDivision] = useState("");
+  const [masterType, setMasterType] = useState("");
   const [masterState, setMasterState] = useState("");
   const [showFilter, setShowFilter] = useState(false);
 
@@ -56,7 +56,7 @@ const CampsPage = () => {
     setLoader(true);
     setError(null);
     try {
-      const url = `/admin/master-camps?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}&division=${masterDivision}&state=${masterState}&db=${dbTab}`;
+      const url = `/admin/master-camps?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}&division=${masterType}&state=${masterState}&db=${dbTab}`;
       const response = await api.get(url);
       setCampData(response.data.data || []);
       setTotal(response.data.total || 0);
@@ -72,21 +72,15 @@ const CampsPage = () => {
     setPage(1);
     setPageInput(1);
     setSearch("");
+    setMasterType("");
+    setMasterState("");
     fetchMasterCamps();
   }, [dbTab]);
 
   // main data fetch
   useEffect(() => {
     fetchMasterCamps();
-  }, [
-    page,
-    limit,
-    debouncedSearch,
-    sortBy,
-    order,
-    masterDivision,
-    masterState,
-  ]);
+  }, [page, limit, debouncedSearch, sortBy, order, masterType, masterState]);
 
   // sorting toggle
   const handleSort = (field) => {
@@ -167,24 +161,25 @@ const CampsPage = () => {
           selectedTab="master"
           onTabChange={() => {}}
           actions={[
-            {
-              label: "Import",
-              icon: BiUpload,
-              color: "bg-emerald-600 hover:bg-emerald-700",
-              onClick: () => setModalType("import"),
-            },
+            // Disable Import and Add (commented out)
+            // {
+            //   label: "Import",
+            //   icon: BiUpload,
+            //   color: "bg-emerald-600 hover:bg-emerald-700",
+            //   onClick: () => setModalType("import"),
+            // },
             {
               label: "Export",
               icon: BiDownload,
               color: "bg-amber-500 hover:bg-amber-600",
               onClick: () => setModalType("export"),
             },
-            {
-              label: "Add",
-              icon: BiPlus,
-              color: "bg-blue-600 hover:bg-blue-700",
-              onClick: () => setModalType("add"),
-            },
+            // {
+            //   label: "Add",
+            //   icon: BiPlus,
+            //   color: "bg-blue-600 hover:bg-blue-700",
+            //   onClick: () => setModalType("add"),
+            // },
             {
               label: "Filter",
               color: "bg-purple-600 hover:bg-purple-700",
@@ -280,8 +275,8 @@ const CampsPage = () => {
         <FilterMasterCamp
           key={dbTab}
           dbTab={dbTab}
-          filterType={masterDivision}
-          setFilterType={setMasterDivision}
+          filterType={masterType}
+          setFilterType={setMasterType}
           filterState={masterState}
           setFilterState={setMasterState}
           setShowFilter={setShowFilter}

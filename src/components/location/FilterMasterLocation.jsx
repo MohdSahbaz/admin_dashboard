@@ -5,6 +5,7 @@ import api from "../../api/axios";
 import toast from "react-hot-toast";
 
 const FilterMasterLocation = ({
+  dbTab = "d2c",
   filterDivision,
   setFilterDivision,
   setShowFilter,
@@ -14,14 +15,16 @@ const FilterMasterLocation = ({
   const [exportFormat, setExportFormat] = useState("csv");
   const [isExporting, setIsExporting] = useState(false);
 
-  // Fetch divisions on mount
+  // Fetch divisions based on DB
   useEffect(() => {
     fetchDivisions();
-  }, []);
+  }, [dbTab]);
 
   const fetchDivisions = async () => {
     try {
-      const res = await api.get(`/admin/get-all-location-divisions`);
+      const res = await api.get(
+        `/admin/get-all-location-divisions?db=${dbTab}`
+      );
       setDivisionList(res.data.data || []);
     } catch (err) {
       toast.error("Failed to fetch divisions");
@@ -44,6 +47,7 @@ const FilterMasterLocation = ({
       const params = new URLSearchParams({
         format,
         division: filterDivision || "",
+        db: dbTab,
       });
 
       const url = `/admin/export-master-locations?${params.toString()}`;
@@ -51,12 +55,12 @@ const FilterMasterLocation = ({
 
       // Extract filename
       const disposition = response.headers["content-disposition"];
-      let filename = `filtered_locations.${format}`;
+      let filename = `filtered_locations_${dbTab}.${format}`;
       if (disposition && disposition.includes("filename=")) {
         filename = disposition.split("filename=")[1].replace(/"/g, "");
       }
 
-      // Download
+      // Download file
       const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = blobUrl;
@@ -66,7 +70,7 @@ const FilterMasterLocation = ({
       link.remove();
       window.URL.revokeObjectURL(blobUrl);
 
-      toast.success("Filtered location data exported successfully!");
+      toast.success(`Filtered location data exported (${dbTab}) successfully!`);
     } catch (err) {
       console.error(err);
       toast.error("Export failed. Please try again.");
@@ -87,10 +91,10 @@ const FilterMasterLocation = ({
         </button>
 
         <h3 className="text-xl font-semibold text-gray-800 text-center">
-          Filter & Export Locations (D2C)
+          Filter & Export Locations ({dbTab.toUpperCase()})
         </h3>
 
-        {/* Division */}
+        {/* Division Filter */}
         <div
           className="space-y-1"
           style={{

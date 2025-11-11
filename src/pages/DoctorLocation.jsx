@@ -14,6 +14,10 @@ import HeaderSection from "../components/common/HeaderSection";
 import DynamicTable from "../components/common/DynamicTable";
 
 const DoctorLocation = () => {
+  // Database selector
+  const [dbTab, setDBTab] = useState("d2c");
+
+  // Modal & Data
   const [modalType, setModalType] = useState(null);
   const [locationData, setLocationData] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -45,12 +49,12 @@ const DoctorLocation = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Fetch master locations
+  // Fetch master locations (based on current DB)
   const fetchMasterLocations = async () => {
     setLoader(true);
     setError(null);
     try {
-      const url = `/admin/master-locations?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}&division=${filterDivision}&state=${filterState}`;
+      const url = `/admin/master-locations?page=${page}&limit=${limit}&search=${debouncedSearch}&sortBy=${sortBy}&order=${order}&division=${filterDivision}&state=${filterState}&db=${dbTab}`;
       const res = await api.get(url);
       setLocationData(res.data.data || []);
       setTotal(res.data.total || 0);
@@ -61,6 +65,17 @@ const DoctorLocation = () => {
     }
   };
 
+  // When DB tab changes
+  useEffect(() => {
+    setPage(1);
+    setPageInput(1);
+    setSearch("");
+    setFilterState("");
+    setFilterDivision("");
+    fetchMasterLocations();
+  }, [dbTab]);
+
+  // When any filter/search/sort/pagination changes
   useEffect(() => {
     fetchMasterLocations();
   }, [
@@ -87,7 +102,7 @@ const DoctorLocation = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const url = `/admin/import-locations?db=d2c&type=master`;
+      const url = `/admin/import-locations?db=${dbTab}&type=master`;
 
       const res = await api.post(url, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -108,7 +123,7 @@ const DoctorLocation = () => {
   const handleExport = async (format, paginationData = null) => {
     try {
       const exportFormat = format === "excel" ? "xlsx" : format;
-      let query = `/admin/export-master-locations?format=${exportFormat}`;
+      let query = `/admin/export-master-locations?format=${exportFormat}&db=${dbTab}`;
 
       if (paginationData && paginationData.offset && paginationData.limit) {
         query += `&offset=${paginationData.offset}&limit=${paginationData.limit}`;
@@ -116,7 +131,7 @@ const DoctorLocation = () => {
 
       const response = await api.get(query, { responseType: "blob" });
       const disposition = response.headers["content-disposition"];
-      let filename = `locations-d2c.${exportFormat}`;
+      let filename = `locations-${dbTab}.${exportFormat}`;
       if (disposition && disposition.includes("filename=")) {
         filename = disposition.split("filename=")[1].replace(/"/g, "");
       }
@@ -130,7 +145,7 @@ const DoctorLocation = () => {
       link.remove();
       window.URL.revokeObjectURL(blobUrl);
 
-      toast.success("Export successful!");
+      toast.success(`Export successful (${dbTab})!`);
     } catch {
       toast.error("Export failed. Please try again.");
     }
@@ -181,6 +196,13 @@ const DoctorLocation = () => {
             setSearch(e.target.value);
             setPage(1);
           }}
+          showDatabaseSelect
+          dbValue={dbTab}
+          onDbChange={setDBTab}
+          databases={[
+            { label: "D2C", value: "d2c" },
+            { label: "Lloyd DB", value: "lloyd-db" },
+          ]}
         />
 
         {/* Master Table */}
@@ -219,19 +241,20 @@ const DoctorLocation = () => {
           <ImportForm
             onClose={handleClose}
             onSubmit={handleImport}
-            title="Import Location Data (D2C)"
+            title={`Import Location Data (${dbTab.toUpperCase()})`}
           />
         )}
         {modalType === "export" && (
           <ExportForm
             onClose={handleClose}
             onSubmit={handleExport}
-            title="Export Location Data (D2C)"
+            title={`Export Location Data (${dbTab.toUpperCase()})`}
           />
         )}
         {modalType === "add" && (
           <AddLocation
             mode="master"
+            db={dbTab}
             onSuccess={() => {
               handleClose();
               fetchMasterLocations();
@@ -244,6 +267,8 @@ const DoctorLocation = () => {
       {/* Filter */}
       {showFilter && (
         <FilterMasterLocation
+          key={dbTab}
+          dbTab={dbTab}
           filterDivision={filterDivision}
           setFilterDivision={setFilterDivision}
           filterState={filterState}
