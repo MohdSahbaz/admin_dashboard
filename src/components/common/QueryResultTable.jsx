@@ -1,7 +1,9 @@
 import { useState } from "react";
 
 /**
- * Safe & dynamic SQL result table
+ * Safe & responsive SQL result table
+ * - Desktop: Table view
+ * - Mobile: Card view (like DynamicTable)
  */
 const QueryResultTable = ({ columns = [], data = [] }) => {
   if (!data || data.length === 0) {
@@ -13,14 +15,18 @@ const QueryResultTable = ({ columns = [], data = [] }) => {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
-      <table className="min-w-full text-sm text-left border-collapse">
-        <thead className="bg-gray-100 text-gray-700 font-semibold border-b border-gray-300">
+    <div
+      className="relative w-full overflow-x-auto"
+      style={{ scrollbarWidth: "thin", scrollbarColor: "#cbd5e1 transparent" }}
+    >
+      {/* Desktop Table */}
+      <table className="w-full text-sm text-gray-700 hidden md:table border-collapse">
+        <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 sticky top-0 z-10 border-b border-gray-200">
           <tr>
             {columns.map((col) => (
               <th
                 key={col.key}
-                className="px-4 py-2 border-b border-gray-300 whitespace-nowrap"
+                className="px-5 py-3 text-left font-semibold text-gray-700 uppercase whitespace-nowrap tracking-wide border-b"
               >
                 {col.label}
               </th>
@@ -28,18 +34,18 @@ const QueryResultTable = ({ columns = [], data = [] }) => {
           </tr>
         </thead>
 
-        <tbody>
+        <tbody className="divide-y divide-gray-100">
           {data.map((row, rowIndex) => (
             <tr
               key={rowIndex}
-              className={`hover:bg-blue-50 transition ${
+              className={`hover:bg-blue-100 transition-all duration-300 ${
                 rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
               }`}
             >
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className="px-4 py-2 border-b border-gray-200 align-top max-w-xs overflow-hidden text-ellipsis whitespace-nowrap"
+                  className="px-5 py-3 whitespace-nowrap max-w-xs overflow-hidden text-ellipsis border-b border-gray-100"
                   title={String(row[col.key] ?? "")}
                 >
                   <SafeValueRenderer value={row[col.key]} />
@@ -49,10 +55,30 @@ const QueryResultTable = ({ columns = [], data = [] }) => {
           ))}
         </tbody>
       </table>
+
+      {/* Mobile Cards */}
+      <div className="space-y-3 md:hidden mt-4">
+        {data.map((row, i) => (
+          <div
+            key={i}
+            className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 transition hover:shadow-md"
+          >
+            {columns.map((col) => (
+              <p key={col.key} className="text-sm text-gray-700 mb-1">
+                <span className="font-medium text-gray-600">{col.label}:</span>{" "}
+                <SafeValueRenderer value={row[col.key]} />
+              </p>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
+/**
+ * Handles safely rendering JSON, dates, numbers, strings, etc.
+ */
 const SafeValueRenderer = ({ value }) => {
   const [open, setOpen] = useState(false);
 

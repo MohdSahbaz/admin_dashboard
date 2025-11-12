@@ -1,24 +1,6 @@
-import { BiSearch } from "react-icons/bi";
+import { useState, useRef, useEffect } from "react";
+import { BiSearch, BiChevronDown } from "react-icons/bi";
 import { FaDatabase } from "react-icons/fa6";
-
-/**
- * Reusable Header Section Component
- *
- * Props:
- * - title: string → Page title (e.g. "Doctors")
- * - total: number → total count
- * - tabs: array → list of tab names (optional)
- * - selectedTab: string → currently active tab
- * - onTabChange: function(tabName)
- * - showTotal: boolean → whether to show total
- * - actions: array → buttons [{ label, icon, color, onClick }]
- * - showSearch: boolean
- * - searchPlaceholder: string
- * - searchValue, onSearchChange
- * - showDatabaseSelect: boolean
- * - dbValue, onDbChange
- * - databases: array → [{ label, value }]
- */
 
 const HeaderSection = ({
   title,
@@ -37,8 +19,22 @@ const HeaderSection = ({
   onDbChange,
   databases = [],
 }) => {
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpenDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="w-full p-6 bg-white dark:bg-white text-black rounded-md border border-gray-100 dark:border-gray-300 transition">
+    <div className="w-full p-6 bg-white text-black rounded-md border border-gray-100 shadow-sm transition">
       {/* === Title & Tabs === */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
         <div>
@@ -59,7 +55,7 @@ const HeaderSection = ({
                 className={`cursor-pointer hover:scale-105 px-5 py-2.5 rounded-md font-medium text-sm capitalize transition-all duration-200 ${
                   selectedTab === tab
                     ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {tab}
@@ -101,19 +97,45 @@ const HeaderSection = ({
           )}
 
           {showDatabaseSelect && (
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <FaDatabase className="text-gray-900 w-5 h-5" />
-              <select
-                value={dbValue}
-                onChange={(e) => onDbChange(e.target.value)}
-                className="cursor-pointer border border-gray-300 rounded-md px-4 py-2.5 bg-gray-50 text-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
+            <div className="relative w-full md:w-auto" ref={dropdownRef}>
+              <button
+                onClick={() => setOpenDropdown((prev) => !prev)}
+                className="flex items-center justify-between gap-2 w-full md:w-56 border border-gray-300 bg-gray-50 text-gray-800 px-4 py-2.5 rounded-md focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all hover:bg-gray-100"
               >
-                {databases.map((db) => (
-                  <option key={db.value} value={db.value}>
-                    {db.label}
-                  </option>
-                ))}
-              </select>
+                <div className="flex items-center gap-2">
+                  <FaDatabase className="text-blue-600 w-5 h-5" />
+                  <span>
+                    {databases.find((db) => db.value === dbValue)?.label ||
+                      "Select Database"}
+                  </span>
+                </div>
+                <BiChevronDown
+                  className={`transition-transform duration-200 ${
+                    openDropdown ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {openDropdown && (
+                <div className="absolute right-0 mt-2 w-full md:w-56 bg-white border border-gray-200 rounded-md shadow-xl z-50 animate-fadeIn">
+                  {databases.map((db) => (
+                    <button
+                      key={db.value}
+                      onClick={() => {
+                        onDbChange(db.value);
+                        setOpenDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-all ${
+                        dbValue === db.value
+                          ? "bg-blue-50 text-blue-700 font-medium"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {db.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -157,7 +157,7 @@ const CampsPage = () => {
           title="Camps"
           showTotal
           total={total}
-          tabs={["master"]} // only one tab
+          tabs={["master"]}
           selectedTab="master"
           onTabChange={() => {}}
           actions={[

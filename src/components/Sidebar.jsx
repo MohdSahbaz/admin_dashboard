@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { MdDashboard, MdLogout, MdKeyboardArrowDown } from "react-icons/md";
-import { GiHospitalCross, GiCampingTent } from "react-icons/gi";
+import { GiHospitalCross, GiCampingTent, GiSecurityGate } from "react-icons/gi";
 import { FaUserDoctor } from "react-icons/fa6";
 import { HiMiniUsers } from "react-icons/hi2";
 import { BiSolidReport } from "react-icons/bi";
@@ -52,7 +52,7 @@ const Sidebar = ({ onLogout, open, onClose }) => {
           } md:translate-x-0 shadow-lg border-r border-gray-200`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-6 h-20 border-b border-gray-200">
+        <div className="flex items-center justify-center gap-3 px-6 h-20 border-b border-gray-200">
           <div className="p-2 rounded-md shadow-sm">
             {/* <GiHospitalCross className="h-7 w-7 text-blue-700" /> */}
             <img
@@ -64,9 +64,7 @@ const Sidebar = ({ onLogout, open, onClose }) => {
               className="relative z-10 h-10 drop-shadow-md"
             />
           </div>
-          <span className="text-xl font-bold text-blue-800 tracking-tight">
-            Lloyd
-          </span>
+          {/* <span clax */}
         </div>
 
         {/* Navigation */}
@@ -153,6 +151,18 @@ const Sidebar = ({ onLogout, open, onClose }) => {
                     <>
                       <HiMiniUsers className={iconClass(isActive)} />
                       Users
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+
+                <NavLink to="/access" className={linkClass}>
+                  {({ isActive }) => (
+                    <>
+                      <GiSecurityGate className={iconClass(isActive)} />
+                      Access
                       {isActive && (
                         <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md"></span>
                       )}

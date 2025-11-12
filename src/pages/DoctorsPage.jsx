@@ -88,35 +88,45 @@ const DoctorsPage = () => {
   };
 
   useEffect(() => {
-    // only switch tab when DB changes
     setLoader(true);
-    if (dbTab === "lloyd-db") {
-      // delay tab switch slightly so it doesn't trigger old fetch
-      setTimeout(() => setSelectedTab("selected"), 500);
+
+    // When switching to Lloyd DB, force "selected" tab immediately
+    if (dbTab === "lloyd-db" && selectedTab !== "selected") {
+      setSelectedTab("selected");
     }
 
+    // Reset filters and pagination cleanly
     setSortBy(selectedTab === "master" ? "dr_code" : "doctor_code");
-
     setPage(1);
-    setPageInput(1);
+    setPageInput("1");
     setMasterDivision("");
     setMasterSpeciality("");
     setSelectedDivision("");
     setSelectedDrType("");
     setSearch("");
-  }, [dbTab, selectedTab]);
+    setDoctorData([]); // Clear previous data instantly
+  }, [dbTab]);
 
   useEffect(() => {
     if (!selectedTab) return;
 
+    // Prevent fetching master data when Lloyd DB is active
+    if (dbTab === "lloyd-db" && selectedTab === "master") {
+      // Just ensure no wrong fetch happens
+      setDoctorData([]);
+      setLoader(false);
+      return;
+    }
+
     setDoctorData([]);
     setLoader(true);
 
-    if (selectedTab === "master") {
-      fetchMasterDoctors();
-    } else {
-      fetchSelectedDoctors();
-    }
+    const fetchData = async () => {
+      if (selectedTab === "master") await fetchMasterDoctors();
+      else await fetchSelectedDoctors();
+    };
+
+    fetchData();
   }, [selectedTab, page, limit, debouncedSearch, sortBy, order, dbTab]);
 
   // toggle sorting
@@ -369,8 +379,8 @@ const DoctorsPage = () => {
               selectedTab === "master"
                 ? "master"
                 : dbTab === "lloyd-db"
-                ? "selected-lloyd"
-                : "selected-d2c"
+                  ? "selected-lloyd"
+                  : "selected-d2c"
             }
             onSuccess={() => {
               handleClose();
