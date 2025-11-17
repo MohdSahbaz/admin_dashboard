@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 
-const ProtectedRoute = ({ children, role }) => {
+const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, token, user, logout, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
@@ -28,14 +28,6 @@ const ProtectedRoute = ({ children, role }) => {
     logout();
     toast.error("Invalid session. Please log in again.", {
       duration: 4000,
-      position: "top-center",
-    });
-    return <Navigate to="/login" replace />;
-  }
-
-  if (role && user?.role?.toLowerCase() !== role.toLowerCase()) {
-    toast.error("You are not authorized to access this page.", {
-      duration: 3000,
       position: "top-center",
     });
     return <Navigate to="/login" replace />;

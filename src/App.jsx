@@ -16,7 +16,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <ProtectedRoute role={"Admin"}>
+      <ProtectedRoute>
         <DashboardPage />
       </ProtectedRoute>
     ),
@@ -24,7 +24,7 @@ const router = createBrowserRouter([
   {
     path: "/doctors",
     element: (
-      <ProtectedRoute role={"Admin"}>
+      <ProtectedRoute>
         <DoctorsPage />
       </ProtectedRoute>
     ),
@@ -32,7 +32,7 @@ const router = createBrowserRouter([
   {
     path: "/camps",
     element: (
-      <ProtectedRoute role={"Admin"}>
+      <ProtectedRoute>
         <Camps />
       </ProtectedRoute>
     ),
@@ -40,7 +40,7 @@ const router = createBrowserRouter([
   {
     path: "/users",
     element: (
-      <ProtectedRoute role={"Admin"}>
+      <ProtectedRoute>
         <Users />
       </ProtectedRoute>
     ),
@@ -48,7 +48,7 @@ const router = createBrowserRouter([
   {
     path: "/reports",
     element: (
-      <ProtectedRoute role={"Admin"}>
+      <ProtectedRoute>
         <Reports />
       </ProtectedRoute>
     ),
@@ -56,7 +56,7 @@ const router = createBrowserRouter([
   {
     path: "/doctor-locations",
     element: (
-      <ProtectedRoute role={"Admin"}>
+      <ProtectedRoute>
         <DoctorLocation />
       </ProtectedRoute>
     ),
@@ -64,7 +64,7 @@ const router = createBrowserRouter([
   {
     path: "/db-console",
     element: (
-      <ProtectedRoute role={"Admin"}>
+      <ProtectedRoute>
         <DBConsole />
       </ProtectedRoute>
     ),
@@ -72,7 +72,7 @@ const router = createBrowserRouter([
   {
     path: "/access",
     element: (
-      <ProtectedRoute role={"Admin"}>
+      <ProtectedRoute>
         <Access />
       </ProtectedRoute>
     ),
