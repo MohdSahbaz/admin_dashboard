@@ -4,6 +4,7 @@ import { FaDatabase } from "react-icons/fa6";
 
 const HeaderSection = ({
   title,
+  description = "",
   total,
   showTotal = false,
   tabs = [],
@@ -33,14 +34,24 @@ const HeaderSection = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const hasDescription = description && description.trim() !== "";
+
   return (
     <div className="w-full p-6 bg-white text-black rounded-md border border-gray-100 shadow-sm transition">
       {/* === Title & Tabs === */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
-        <div>
+        <div className="mb-4">
           <h1 className="text-2xl font-bold text-blue-800">{title}</h1>
+
+          {hasDescription && (
+            <p className="text-gray-600 text-sm mt-2 leading-relaxed">
+              {description}
+            </p>
+          )}
+
+          {/* SHOW TOTAL EVEN WITH DESCRIPTION */}
           {showTotal && (
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-gray-500 mt-1">
               Total: <span className="font-medium text-blue-600">{total}</span>
             </p>
           )}

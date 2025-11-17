@@ -53,17 +53,17 @@ const Sidebar = ({ onLogout, open, onClose }) => {
       >
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 px-6 h-20 border-b border-gray-200">
-          <div className="p-2 rounded-md shadow-sm">
-            {/* <GiHospitalCross className="h-7 w-7 text-blue-700" /> */}
+          <div className="flex items-center justify-center py-5 border-b border-gray-200">
             <img
               src={
                 logo ||
                 "https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png"
               }
               alt="Lloyd Logo"
-              className="relative z-10 h-10 drop-shadow-md"
+              className="h-14 w-auto object-contain"
             />
           </div>
+
           {/* <span clax */}
         </div>
 

@@ -9,7 +9,7 @@ import Reports from "./pages/ReportsPage";
 import DoctorsPage from "./pages/DoctorsPage";
 import DoctorLocation from "./pages/DoctorLocation";
 import DBConsole from "./pages/DBConsole";
-// import DoctorLocation from "./pages/DoctorLocation";
+import Access from "./pages/Access";
 
 const router = createBrowserRouter([
   { path: "/login", element: <LoginForm /> },
@@ -66,6 +66,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute role={"Admin"}>
         <DBConsole />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/access",
+    element: (
+      <ProtectedRoute role={"Admin"}>
+        <Access />
       </ProtectedRoute>
     ),
   },
