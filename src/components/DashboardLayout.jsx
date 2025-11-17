@@ -29,7 +29,9 @@ const DashboardLayout = ({ children }) => {
       <div className="flex-1 flex flex-col md:ml-64 mt-18">
         {/* Header */}
         <Header
+          userName={user.name}
           userEmail={user?.email || "NA"}
+          userRole={user.role}
           onMenuClick={() => setSidebarOpen(true)}
         />
 

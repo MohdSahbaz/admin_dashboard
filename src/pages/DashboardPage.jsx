@@ -65,18 +65,18 @@ const DashboardPage = () => {
       color: "from-green-50 to-green-100",
     },
     {
+      title: "Access Users",
+      value: data?.total_access ?? "—",
+      icon: <BiSolidReport className="text-pink-600 text-3xl" />,
+      link: "/access",
+      color: "from-orange-50 to-orange-100",
+    },
+    {
       title: "Doctor Locations",
       value: data?.total_locations ?? "—",
       icon: <FiMapPin className="text-teal-600 text-3xl" />,
       link: "/doctor-locations",
       color: "from-teal-50 to-teal-100",
-    },
-    {
-      title: "Reports",
-      value: data?.total_reports ?? "—",
-      icon: <BiSolidReport className="text-orange-600 text-3xl" />,
-      link: "/reports",
-      color: "from-orange-50 to-orange-100",
     },
   ];
 
@@ -84,11 +84,11 @@ const DashboardPage = () => {
     { name: "Doctors", value: Number(data?.total_doctors) || 0 },
     { name: "Camps", value: Number(data?.total_camps) || 0 },
     { name: "Users", value: Number(data?.total_users) || 0 },
-    { name: "Reports", value: Number(data?.total_reports) || 0 },
-    { name: "Locations", value: Number(data?.total_locations) || 0 }, // added
+    { name: "Access", value: Number(data?.total_access) || 0 },
+    { name: "Locations", value: Number(data?.total_locations) || 0 },
   ];
 
-  const COLORS = ["#2563eb", "#4f46e5", "#16a34a", "#f97316", "#0ea5a4"]; // added teal
+  const COLORS = ["#2563eb", "#4f46e5", "#16a34a", "#db2777", "#0ea5a4"];
 
   return (
     <DashboardLayout>

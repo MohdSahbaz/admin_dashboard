@@ -1,7 +1,7 @@
 import React from "react";
 import { MdMenu } from "react-icons/md";
 
-const Header = ({ userEmail, onMenuClick }) => {
+const Header = ({ userName, userEmail, userRole, onMenuClick }) => {
   return (
     <header className="fixed w-full md:w-[calc(100vw-16rem)] top-0 right-0 z-40 flex items-center justify-between h-16 md:h-20 px-5 md:px-10 bg-white border-b border-gray-200 shadow-sm transition-all duration-300">
       {/* === Left Section === */}
@@ -18,7 +18,7 @@ const Header = ({ userEmail, onMenuClick }) => {
         {/* Greeting / Title */}
         <div>
           <h1 className="text-lg md:text-xl font-semibold text-gray-800 tracking-tight">
-            Welcome back 👋
+            Welcome back 👋, {userName}
           </h1>
           <p className="text-sm text-gray-500 hidden sm:block">
             Manage your dashboard efficiently
@@ -33,7 +33,7 @@ const Header = ({ userEmail, onMenuClick }) => {
           <span className="font-medium text-gray-800 text-sm">
             {userEmail || "admin@example.com"}
           </span>
-          <span className="text-xs text-gray-500">Administrator</span>
+          <span className="text-xs text-gray-500">{userRole}</span>
         </div>
 
         {/* Profile Circle (Placeholder or Avatar) */}

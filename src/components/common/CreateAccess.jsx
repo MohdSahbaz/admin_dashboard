@@ -17,6 +17,7 @@ const accessOptions = {
     "Access",
     "Doctors Location",
     "Reports",
+    "Db Console",
   ],
   dbs: ["D2C", "Lloyd DB"],
   schemas: ["Master", "Selected"],

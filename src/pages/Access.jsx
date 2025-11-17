@@ -6,9 +6,9 @@ import DynamicTable from "../components/common/DynamicTable";
 import PaginationControls from "../components/common/PaginationControls";
 import api from "../api/axios";
 import toast from "react-hot-toast";
-import Select from "react-select";
-import { BiPlus, BiEditAlt, BiTrash } from "react-icons/bi";
+import { BiEditAlt, BiTrash } from "react-icons/bi";
 import CreateAccess from "../components/common/CreateAccess";
+import DeleteModal from "../components/common/DeleteModal";
 
 const roleOptions = [
   { value: "administrator", label: "Administrator" },
@@ -51,6 +51,10 @@ const Access = () => {
     dbs: [],
     schemas: [],
   });
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // debounce search
   useEffect(() => {
@@ -149,17 +153,22 @@ const Access = () => {
   };
 
   // Handle Delete Access
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this access?"
-    );
-    if (!confirmDelete) return;
+  const openDeleteModal = (id) => {
+    setDeleteId(id);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleteLoading(true);
     try {
-      await api.delete(`/admin/delete-access/${id}`);
+      await api.delete(`/admin/delete-access/${deleteId}`);
       toast.success("Access deleted successfully!");
+      setDeleteModalOpen(false);
       fetchAccessUsers();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to delete access");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -236,7 +245,7 @@ const Access = () => {
                     <BiEditAlt size={18} />
                   </button>
                   <button
-                    onClick={() => handleDelete(row.id)}
+                    onClick={() => openDeleteModal(row.id)}
                     className="cursor-pointer p-2 text-red-600 hover:bg-red-50 rounded-lg"
                     title="Delete"
                   >
@@ -275,6 +284,15 @@ const Access = () => {
           onCancel={() => setModalOpen(false)}
         />
       </Modal>
+
+      <DeleteModal
+        isOpen={deleteModalOpen}
+        title="Delete Access User?"
+        message="Are you sure you want to delete this access user? This action cannot be undone."
+        onCancel={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        loading={deleteLoading}
+      />
     </DashboardLayout>
   );
 };

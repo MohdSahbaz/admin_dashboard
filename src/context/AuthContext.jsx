@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem("authToken");
   };
 
-  // ✅ Check storage on mount
+  // Check storage on mount
   useEffect(() => {
     const loadAuth = () => {
       const storedUser =
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
 
     loadAuth();
 
-    // ✅ Listen to manual logout (like storage clearing in other tabs)
+    // Listen to manual logout (like storage clearing in other tabs)
     window.addEventListener("storage", loadAuth);
 
     return () => {
