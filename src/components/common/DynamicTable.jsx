@@ -84,7 +84,7 @@ const DynamicTable = ({
       )}
 
       {/* Mobile View */}
-      <div className="space-y-3 md:hidden mt-4 px-2">
+      <div className="space-y-3 md:hidden mt-4 px-2 pb-4">
         {data.map((row, i) => (
           <div
             key={i}
