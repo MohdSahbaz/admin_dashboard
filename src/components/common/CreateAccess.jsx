@@ -24,6 +24,57 @@ const accessOptions = {
   actions: ["Import", "Export", "Add", "Filter"],
 };
 
+// Auto select schemas based on DB selection
+const autoSelectSchemas = (updated) => {
+  let schemas = [...(updated.schemas || [])];
+
+  const hasLloyd = updated.dbs?.includes("Lloyd DB");
+  const hasD2C = updated.dbs?.includes("D2C");
+
+  // Lloyd DB → must include "Selected"
+  if (hasLloyd && !schemas.includes("Selected")) {
+    schemas.push("Selected");
+  }
+
+  // D2C → must include "Master"
+  if (hasD2C && !schemas.includes("Master")) {
+    schemas.push("Master");
+  }
+
+  return { ...updated, schemas };
+};
+
+// Relationship rules:
+// Lloyd DB ↔ Selected
+// D2C ↔ Master
+
+const syncDBSchema = (updated) => {
+  let dbs = [...(updated.dbs || [])];
+  let schemas = [...(updated.schemas || [])];
+
+  const hasLloyd = dbs.includes("Lloyd DB");
+  const hasD2C = dbs.includes("D2C");
+
+  // DB → Schema rules
+  if (hasLloyd && !schemas.includes("Selected")) schemas.push("Selected");
+  if (!hasLloyd) schemas = schemas.filter((s) => s !== "Selected");
+
+  if (hasD2C && !schemas.includes("Master")) schemas.push("Master");
+  if (!hasD2C) schemas = schemas.filter((s) => s !== "Master");
+
+  // Schema → DB rules
+  const wantsSelected = schemas.includes("Selected");
+  const wantsMaster = schemas.includes("Master");
+
+  if (wantsSelected && !dbs.includes("Lloyd DB")) dbs.push("Lloyd DB");
+  if (!wantsSelected) dbs = dbs.filter((d) => d !== "Lloyd DB");
+
+  if (wantsMaster && !dbs.includes("D2C")) dbs.push("D2C");
+  if (!wantsMaster) dbs = dbs.filter((d) => d !== "D2C");
+
+  return { ...updated, dbs, schemas };
+};
+
 const CreateAccess = ({
   form,
   setForm,
@@ -285,7 +336,18 @@ const CreateAccess = ({
                     <input
                       type="checkbox"
                       checked={selectedAccess.dbs?.includes(db)}
-                      onChange={() => handleCheckboxChange("dbs", db)}
+                      onChange={() => {
+                        setSelectedAccess((prev) => {
+                          let updatedDBs = prev.dbs.includes(db)
+                            ? prev.dbs.filter((d) => d !== db)
+                            : [...prev.dbs, db];
+
+                          return syncDBSchema({
+                            ...prev,
+                            dbs: updatedDBs,
+                          });
+                        });
+                      }}
                       className="mr-2 accent-blue-600"
                     />
                     {db}
@@ -304,7 +366,19 @@ const CreateAccess = ({
                     <input
                       type="checkbox"
                       checked={selectedAccess.schemas?.includes(schema)}
-                      onChange={() => handleCheckboxChange("schemas", schema)}
+                      disabled={true}
+                      onChange={() => {
+                        setSelectedAccess((prev) => {
+                          let updatedSchemas = prev.schemas.includes(schema)
+                            ? prev.schemas.filter((s) => s !== schema)
+                            : [...prev.schemas, schema];
+
+                          return syncDBSchema({
+                            ...prev,
+                            schemas: updatedSchemas,
+                          });
+                        });
+                      }}
                       className="mr-2 accent-blue-600"
                     />
                     {schema}
