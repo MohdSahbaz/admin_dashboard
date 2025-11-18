@@ -14,10 +14,13 @@ import { masterDocColumns } from "../config/doctorColumns";
 import PaginationControls from "../components/common/PaginationControls";
 import HeaderSection from "../components/common/HeaderSection";
 import DynamicTable from "../components/common/DynamicTable";
+import { useAccess } from "../context/AccessContext";
 
 const DoctorsPage = () => {
-  const [selectedTab, setSelectedTab] = useState("master");
-  const [dbTab, setDBTab] = useState("d2c");
+  const { access } = useAccess();
+
+  const [selectedTab, setSelectedTab] = useState("");
+  const [dbTab, setDBTab] = useState("");
 
   const [modalType, setModalType] = useState(null);
   const [doctorData, setDoctorData] = useState([]);
@@ -48,6 +51,22 @@ const DoctorsPage = () => {
   const [showFilter, setShowFilter] = useState(false);
 
   const handleClose = () => setModalType(null);
+
+  // when schemas load, set default tab
+  useEffect(() => {
+    if (!Array.isArray(access?.schemas)) return;
+    if (access.schemas.length === 0) return;
+
+    setSelectedTab(access.schemas[0].toLowerCase());
+  }, [access?.schemas]);
+
+  // Set default DB based on access.dbs
+  useEffect(() => {
+    if (!Array.isArray(access?.dbs) || access.dbs.length === 0) return;
+
+    const firstDb = access.dbs[0].toLowerCase().replace(/\s+/g, "-");
+    setDBTab(firstDb);
+  }, [access?.dbs]);
 
   // debounce search to avoid multiple calls
   useEffect(() => {
@@ -181,7 +200,7 @@ const DoctorsPage = () => {
 
       const response = await api.get(query, { responseType: "blob" });
 
-      // ✅ Get filename from server
+      // Get filename from server
       const disposition = response.headers["content-disposition"];
       let filename = "download." + exportFormat;
 
@@ -189,7 +208,7 @@ const DoctorsPage = () => {
         filename = disposition.split("filename=")[1].replace(/"/g, "");
       }
 
-      // ✅ Download file with correct name
+      // Download file with correct name
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -211,6 +230,12 @@ const DoctorsPage = () => {
 
   const totalPages = Math.ceil(total / limit);
 
+  const hasD2C = access?.dbs?.some(
+    (db) => db.toLowerCase().replace(/\s+/g, "-") === "d2c"
+  );
+
+  const can = (tabName) => access?.actions?.includes(tabName);
+
   return (
     <DashboardLayout>
       <div className="space-y-6 md:max-w-[calc(100vw-20rem)]">
@@ -219,36 +244,46 @@ const DoctorsPage = () => {
           title="Doctors"
           showTotal
           total={total}
-          tabs={["master", "selected"].filter(
-            (tab) => !(dbTab === "lloyd-db" && tab === "master")
-          )}
+          tabs={(Array.isArray(access?.schemas) ? access.schemas : [])
+            .map((tab) => tab.toLowerCase())
+            .filter((tab) => {
+              // If Lloyd DB is NOT available → remove ONLY "selected"
+              if (!hasD2C && tab === "master") {
+                return false;
+              }
+
+              // if Lloyd DB is selected, hide master
+              if (dbTab === "lloyd-db" && tab === "master") return false;
+
+              return true;
+            })}
           selectedTab={selectedTab}
           onTabChange={setSelectedTab}
           actions={[
-            {
+            can("Import") && {
               label: "Import",
               icon: BiUpload,
               color: "bg-emerald-600 hover:bg-emerald-700",
               onClick: () => setModalType("import"),
             },
-            {
+            can("Export") && {
               label: "Export",
               icon: BiDownload,
               color: "bg-amber-500 hover:bg-amber-600",
               onClick: () => setModalType("export"),
             },
-            {
+            can("Add") && {
               label: "Add",
               icon: BiPlus,
               color: "bg-blue-600 hover:bg-blue-700",
               onClick: () => setModalType("add"),
             },
-            {
+            can("Filter") && {
               label: "Filter",
               color: "bg-purple-600 hover:bg-purple-700",
               onClick: () => setShowFilter(true),
             },
-          ]}
+          ].filter(Boolean)}
           showSearch
           searchPlaceholder={`Search doctors by ${
             selectedTab === "master"
@@ -263,10 +298,14 @@ const DoctorsPage = () => {
           showDatabaseSelect
           dbValue={dbTab}
           onDbChange={setDBTab}
-          databases={[
-            { label: "D2C", value: "d2c" },
-            { label: "Lloyd DB", value: "lloyd-db" },
-          ]}
+          databases={
+            Array.isArray(access?.dbs)
+              ? access.dbs.map((db) => ({
+                  label: db, // original text
+                  value: db.toLowerCase().replace(/\s+/g, "-"), // lowercase + hyphens
+                }))
+              : []
+          }
         />
 
         {/*  Master Table */}
@@ -293,20 +332,6 @@ const DoctorsPage = () => {
               order={order}
               onSort={handleSort}
               renderCell={(key, value, row) => {
-                // // Custom cell rendering for specific columns
-                // if (key === "status") {
-                //   return (
-                //     <span
-                //       className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                //         value === "A"
-                //           ? "bg-green-100 text-green-700"
-                //           : "bg-red-100 text-red-700"
-                //       }`}
-                //     >
-                //       {value === "A" ? "Active" : "Inactive"}
-                //     </span>
-                //   );
-                // }
                 return value || "—";
               }}
             />
@@ -401,6 +426,7 @@ const DoctorsPage = () => {
           setFilterSpeciality={setMasterSpeciality}
           setShowFilter={setShowFilter}
           fetchMasterDoctors={fetchMasterDoctors}
+          canExport={can("Export")}
         />
       )}
 
@@ -417,6 +443,7 @@ const DoctorsPage = () => {
             fetchSelectedDoctors();
             setShowFilter(false);
           }}
+          canExport={can("Export")}
         />
       )}
     </DashboardLayout>

@@ -10,11 +10,19 @@ import DoctorsPage from "./pages/DoctorsPage";
 import DoctorLocation from "./pages/DoctorLocation";
 import DBConsole from "./pages/DBConsole";
 import Access from "./pages/Access";
+import ForbiddenPage from "./pages/ForbiddenPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const router = createBrowserRouter([
   { path: "/login", element: <LoginForm /> },
+  // Root redirect only (NO CHILDREN HERE)
   {
     path: "/",
+    element: <ProtectedRoute redirectHome={true} />,
+  },
+  // Real pages
+  {
+    path: "/dashboard",
     element: (
       <ProtectedRoute>
         <DashboardPage />
@@ -54,7 +62,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/doctor-locations",
+    path: "/doctors-location",
     element: (
       <ProtectedRoute>
         <DoctorLocation />
@@ -76,6 +84,14 @@ const router = createBrowserRouter([
         <Access />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: "/403",
+    element: <ForbiddenPage />,
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 

@@ -12,6 +12,7 @@ const FilterSelectedDoc = ({
   setFilterDrType,
   close,
   apply,
+  canExport,
 }) => {
   const [divisionList, setDivisionList] = useState([]);
   const [drTypeList, setDrTypeList] = useState([]);
@@ -154,56 +155,58 @@ const FilterSelectedDoc = ({
         )}
 
         {/* Export Filtered Data Section */}
-        <div className="border-t border-gray-200 pt-3 space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Export Format
-          </label>
-          <select
-            value={exportFormat}
-            onChange={(e) => setExportFormat(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="csv">CSV (.csv)</option>
-            <option value="xlsx">Excel (.xlsx)</option>
-          </select>
+        {canExport && (
+          <div className="border-t border-gray-200 pt-3 space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Export Format
+            </label>
+            <select
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="csv">CSV (.csv)</option>
+              <option value="xlsx">Excel (.xlsx)</option>
+            </select>
 
-          <button
-            onClick={handleFilteredExport}
-            disabled={isExporting}
-            className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center gap-2 py-2.5 rounded-md hover:scale-[1.02] transition shadow-sm disabled:opacity-50"
-          >
-            {isExporting ? (
-              <>
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  ></path>
-                </svg>
-                Exporting...
-              </>
-            ) : (
-              <>
-                <BiDownload className="text-lg" />
-                Export Filtered Data
-              </>
-            )}
-          </button>
-        </div>
+            <button
+              onClick={handleFilteredExport}
+              disabled={isExporting}
+              className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center gap-2 py-2.5 rounded-md hover:scale-[1.02] transition shadow-sm disabled:opacity-50"
+            >
+              {isExporting ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"
+                    ></path>
+                  </svg>
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <BiDownload className="text-lg" />
+                  Export Filtered Data
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-3 gap-2 pt-2">
           <button

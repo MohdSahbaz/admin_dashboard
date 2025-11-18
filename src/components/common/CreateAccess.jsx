@@ -21,6 +21,7 @@ const accessOptions = {
   ],
   dbs: ["D2C", "Lloyd DB"],
   schemas: ["Master", "Selected"],
+  actions: ["Import", "Export", "Add", "Filter"],
 };
 
 const CreateAccess = ({
@@ -215,8 +216,45 @@ const CreateAccess = ({
             <h3 className="text-sm font-semibold mb-4 text-gray-700">
               Access Permissions
             </h3>
+            {/* Select All Checkbox */}
+            <label className="flex items-center gap-2 mb-4 cursor-pointer font-medium text-gray-800">
+              <input
+                type="checkbox"
+                className="accent-blue-600 w-4 h-4"
+                checked={
+                  selectedAccess.tabs?.length === accessOptions.tabs.length &&
+                  selectedAccess.dbs?.length === accessOptions.dbs.length &&
+                  selectedAccess.schemas?.length ===
+                    accessOptions.schemas.length &&
+                  selectedAccess.actions?.length ===
+                    accessOptions.actions.length
+                }
+                onChange={(e) => {
+                  const checked = e.target.checked;
 
-            <div className="grid grid-cols-3 gap-5">
+                  if (checked) {
+                    // select all
+                    setSelectedAccess({
+                      tabs: [...accessOptions.tabs],
+                      dbs: [...accessOptions.dbs],
+                      schemas: [...accessOptions.schemas],
+                      actions: [...accessOptions.actions],
+                    });
+                  } else {
+                    // clear all
+                    setSelectedAccess({
+                      tabs: [],
+                      dbs: [],
+                      schemas: [],
+                      actions: [],
+                    });
+                  }
+                }}
+              />
+              Select All
+            </label>
+
+            <div className="grid grid-cols-4 gap-5">
               {/* Tabs Section */}
               <div>
                 <h4 className="font-medium mb-2 text-gray-800">Tabs</h4>
@@ -270,6 +308,25 @@ const CreateAccess = ({
                       className="mr-2 accent-blue-600"
                     />
                     {schema}
+                  </label>
+                ))}
+              </div>
+
+              {/* Actions Section */}
+              <div>
+                <h4 className="font-medium mb-2 text-gray-800">Actions</h4>
+                {accessOptions.actions.map((action) => (
+                  <label
+                    key={action}
+                    className="block text-gray-700 cursor-pointer select-none mb-1"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedAccess.actions?.includes(action)}
+                      onChange={() => handleCheckboxChange("actions", action)}
+                      className="mr-2 accent-blue-600"
+                    />
+                    {action}
                   </label>
                 ))}
               </div>

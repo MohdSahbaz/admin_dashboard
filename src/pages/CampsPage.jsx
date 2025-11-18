@@ -16,9 +16,12 @@ import {
 import PaginationControls from "../components/common/PaginationControls";
 import HeaderSection from "../components/common/HeaderSection";
 import DynamicTable from "../components/common/DynamicTable";
+import { useAccess } from "../context/AccessContext";
 
 const CampsPage = () => {
-  const [dbTab, setDBTab] = useState("d2c");
+  const { access } = useAccess();
+
+  const [dbTab, setDBTab] = useState("");
 
   const [modalType, setModalType] = useState(null);
   const [campData, setCampData] = useState([]);
@@ -44,6 +47,14 @@ const CampsPage = () => {
   const [showFilter, setShowFilter] = useState(false);
 
   const handleClose = () => setModalType(null);
+
+  // Set default DB based on access.dbs
+  useEffect(() => {
+    if (!Array.isArray(access?.dbs) || access.dbs.length === 0) return;
+
+    const firstDb = access.dbs[0].toLowerCase().replace(/\s+/g, "-");
+    setDBTab(firstDb);
+  }, [access?.dbs]);
 
   // debounce search
   useEffect(() => {
@@ -149,6 +160,8 @@ const CampsPage = () => {
 
   const totalPages = Math.ceil(total / limit);
 
+  const can = (tabName) => access?.actions?.includes(tabName);
+
   return (
     <DashboardLayout>
       <div className="space-y-6 md:max-w-[calc(100vw-20rem)]">
@@ -168,7 +181,7 @@ const CampsPage = () => {
             //   color: "bg-emerald-600 hover:bg-emerald-700",
             //   onClick: () => setModalType("import"),
             // },
-            {
+            can("Export") && {
               label: "Export",
               icon: BiDownload,
               color: "bg-amber-500 hover:bg-amber-600",
@@ -180,12 +193,12 @@ const CampsPage = () => {
             //   color: "bg-blue-600 hover:bg-blue-700",
             //   onClick: () => setModalType("add"),
             // },
-            {
+            can("Filter") && {
               label: "Filter",
               color: "bg-purple-600 hover:bg-purple-700",
               onClick: () => setShowFilter(true),
             },
-          ]}
+          ].filter(Boolean)}
           showSearch
           searchPlaceholder="Search camps by dr_code, location, or state..."
           searchValue={search}
@@ -196,10 +209,18 @@ const CampsPage = () => {
           showDatabaseSelect
           dbValue={dbTab}
           onDbChange={setDBTab}
-          databases={[
-            { label: "D2C", value: "d2c" },
-            { label: "Lloyd DB", value: "lloyd-db" },
-          ]}
+          // databases={[
+          //   { label: "D2C", value: "d2c" },
+          //   { label: "Lloyd DB", value: "lloyd-db" },
+          // ]}
+          databases={
+            Array.isArray(access?.dbs)
+              ? access.dbs.map((db) => ({
+                  label: db, // original text
+                  value: db.toLowerCase().replace(/\s+/g, "-"), // lowercase + hyphens
+                }))
+              : []
+          }
         />
 
         {/* Master Table */}
@@ -281,6 +302,7 @@ const CampsPage = () => {
           setFilterState={setMasterState}
           setShowFilter={setShowFilter}
           fetchMasterCamps={fetchMasterCamps}
+          canExport={can("Export")}
         />
       )}
     </DashboardLayout>

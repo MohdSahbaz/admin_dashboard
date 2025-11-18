@@ -101,7 +101,7 @@ const Sidebar = ({ onLogout, open, onClose }) => {
               >
                 <div className="space-y-1 pl-1">
                   {can("Dashboard") && (
-                    <NavLink to="/" className={linkClass} end>
+                    <NavLink to="/dashboard" className={linkClass} end>
                       {({ isActive }) => (
                         <>
                           <MdDashboard className={iconClass(isActive)} />
@@ -195,7 +195,7 @@ const Sidebar = ({ onLogout, open, onClose }) => {
                   )}
 
                   {can("Doctors Location") && (
-                    <NavLink to="/doctor-locations" className={linkClass}>
+                    <NavLink to="/doctors-location" className={linkClass}>
                       {({ isActive }) => (
                         <>
                           <FiMapPin className={iconClass(isActive)} />

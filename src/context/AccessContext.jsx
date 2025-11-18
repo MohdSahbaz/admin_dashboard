@@ -36,7 +36,6 @@ export const AccessProvider = ({ children }) => {
   }, [token, isLoggedIn]);
 
   useEffect(() => {
-    console.log("Access updated:", access);
   }, [access]);
 
   return (

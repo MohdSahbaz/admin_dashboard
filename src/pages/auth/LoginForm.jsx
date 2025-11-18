@@ -1,18 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { MdMail, MdLock } from "react-icons/md";
 import api from "../../api/axios";
 import logo from "../../assets/logo.png";
+import { useAccess } from "../../context/AccessContext";
 
 const LoginForm = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isLoggedIn } = useAuth();
+  const { access } = useAccess();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (isLoggedIn && access?.tabs?.length > 0) {
+      const first = access.tabs[0].replace(/\s+/g, "-").toLowerCase();
+      toast.error(`Your session is already active.`);
+      navigate(`/${first}`);
+    }
+  }, [isLoggedIn, access]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,7 +46,7 @@ const LoginForm = () => {
 
       login(user, token, remember);
       toast.success(`Welcome back, ${user.email}!`);
-      navigate("/");
+      navigate(`/${user.access.tabs[0].replace(/\s+/g, "-").toLowerCase()}`);
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid email or password");
     } finally {

@@ -74,7 +74,7 @@ const DynamicTable = ({
                   <td key={col.key} className="px-5 py-3 whitespace-nowrap">
                     {renderCell
                       ? renderCell(col.key, row[col.key], row)
-                      : row[col.key] ?? "—"}
+                      : (row[col.key] ?? "—")}
                   </td>
                 ))}
               </tr>
@@ -91,12 +91,12 @@ const DynamicTable = ({
             className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 transition hover:shadow-md"
           >
             {columns.map((col) => (
-              <p key={col.key} className="text-sm text-gray-700 mb-1">
+              <div key={col.key} className="text-sm text-gray-700 mb-1">
                 <span className="font-medium text-gray-600">{col.label}:</span>{" "}
                 {renderCell
                   ? renderCell(col.key, row[col.key], row)
                   : row[col.key] || "—"}
-              </p>
+              </div>
             ))}
           </div>
         ))}

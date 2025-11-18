@@ -12,10 +12,13 @@ import { masterLocationColumns } from "../config/locationColumns";
 import PaginationControls from "../components/common/PaginationControls";
 import HeaderSection from "../components/common/HeaderSection";
 import DynamicTable from "../components/common/DynamicTable";
+import { useAccess } from "../context/AccessContext";
 
 const DoctorLocation = () => {
+  const { access } = useAccess();
+
   // Database selector
-  const [dbTab, setDBTab] = useState("d2c");
+  const [dbTab, setDBTab] = useState("");
 
   // Modal & Data
   const [modalType, setModalType] = useState(null);
@@ -42,6 +45,14 @@ const DoctorLocation = () => {
   const [showFilter, setShowFilter] = useState(false);
 
   const handleClose = () => setModalType(null);
+
+  // Set default DB based on access.dbs
+  useEffect(() => {
+    if (!Array.isArray(access?.dbs) || access.dbs.length === 0) return;
+
+    const firstDb = access.dbs[0].toLowerCase().replace(/\s+/g, "-");
+    setDBTab(firstDb);
+  }, [access?.dbs]);
 
   // Debounce search
   useEffect(() => {
@@ -153,6 +164,8 @@ const DoctorLocation = () => {
 
   const totalPages = Math.ceil(total / limit);
 
+  const can = (tabName) => access?.actions?.includes(tabName);
+
   return (
     <DashboardLayout>
       <div className="space-y-6 md:max-w-[calc(100vw-20rem)]">
@@ -165,30 +178,30 @@ const DoctorLocation = () => {
           selectedTab="master"
           onTabChange={() => {}}
           actions={[
-            {
+            can("Import") && {
               label: "Import",
               icon: BiUpload,
               color: "bg-emerald-600 hover:bg-emerald-700",
               onClick: () => setModalType("import"),
             },
-            {
+            can("Export") && {
               label: "Export",
               icon: BiDownload,
               color: "bg-amber-500 hover:bg-amber-600",
               onClick: () => setModalType("export"),
             },
-            {
+            can("Add") && {
               label: "Add",
               icon: BiPlus,
               color: "bg-blue-600 hover:bg-blue-700",
               onClick: () => setModalType("add"),
             },
-            {
+            can("Filter") && {
               label: "Filter",
               color: "bg-purple-600 hover:bg-purple-700",
               onClick: () => setShowFilter(true),
             },
-          ]}
+          ].filter(Boolean)}
           showSearch
           searchPlaceholder="Search locations by dr_code or division..."
           searchValue={search}
@@ -199,10 +212,19 @@ const DoctorLocation = () => {
           showDatabaseSelect
           dbValue={dbTab}
           onDbChange={setDBTab}
-          databases={[
-            { label: "D2C", value: "d2c" },
-            { label: "Lloyd DB", value: "lloyd-db" },
-          ]}
+          databases={
+            Array.isArray(access?.dbs)
+              ? access.dbs.map((db) => ({
+                  label: db, // original text
+                  value: db.toLowerCase().replace(/\s+/g, "-"), // lowercase + hyphens
+                }))
+              : []
+          }
+
+          // databases={[
+          //   { label: "D2C", value: "d2c" },
+          //   { label: "Lloyd DB", value: "lloyd-db" },
+          // ]}
         />
 
         {/* Master Table */}
@@ -275,6 +297,7 @@ const DoctorLocation = () => {
           setFilterState={setFilterState}
           setShowFilter={setShowFilter}
           fetchMasterLocations={fetchMasterLocations}
+          canExport={can("Export")}
         />
       )}
     </DashboardLayout>
