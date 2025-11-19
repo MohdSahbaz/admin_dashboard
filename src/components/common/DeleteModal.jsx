@@ -13,7 +13,7 @@ const DeleteModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-2">
-      <div className="bg-white w-80 sm:w-96 rounded-xl p-6 shadow-xl relative">
+      <div className="bg-white w-80 sm:w-96 rounded-md p-6 shadow-xl relative">
         {/* Close */}
         <button
           className="cursor-pointer absolute right-3 top-3 text-gray-500 hover:text-black"

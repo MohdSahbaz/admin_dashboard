@@ -7,7 +7,7 @@ import AddDoctor from "../components/doctor/AddDoctor";
 import api from "../api/axios";
 import Loader from "../components/common/Loader";
 import toast from "react-hot-toast";
-import { BiDownload, BiPlus, BiUpload } from "react-icons/bi";
+import { BiDownload, BiErrorCircle, BiPlus, BiUpload } from "react-icons/bi";
 import FilterMasterDoc from "../components/doctor/FilterMasterDoc";
 import FilterSelectedDoc from "../components/doctor/FilterSelectedDoc";
 import { masterDocColumns } from "../config/doctorColumns";
@@ -83,8 +83,8 @@ const DoctorsPage = () => {
       const response = await api.get(url);
       setDoctorData(response.data.data || []);
       setTotal(response.data.total || 0);
-    } catch {
-      setError("Failed to fetch doctors");
+    } catch (error) {
+      setError(error?.response?.data?.message || "Failed to fetch doctors");
     } finally {
       setLoader(false);
     }
@@ -99,8 +99,8 @@ const DoctorsPage = () => {
       const response = await api.get(url);
       setDoctorData(response.data.data || []);
       setTotal(response.data.total || 0);
-    } catch {
-      setError("Failed to fetch doctors");
+    } catch (error) {
+      setError(error?.response?.data?.message || "Failed to fetch doctors");
     } finally {
       setLoader(false);
     }
@@ -342,8 +342,6 @@ const DoctorsPage = () => {
             <div className="overflow-x-auto block md:max-w-[calc(100vw-19rem)]">
               {loader ? (
                 <Loader />
-              ) : error ? (
-                <div className="text-center py-6 text-red-600">{error}</div>
               ) : (
                 <DynamicTable
                   columns={[

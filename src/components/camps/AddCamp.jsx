@@ -85,7 +85,7 @@ const AddCamp = ({ mode = "d2c", onSuccess, onCancel }) => {
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
       <div
-        className="relative bg-white rounded-2xl w-[92%] md:w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl animate-fadeIn border border-gray-100 transition-all duration-300"
+        className="relative bg-white rounded-md w-[92%] md:w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl animate-fadeIn border border-gray-100 transition-all duration-300"
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "#cbd5e1 transparent",

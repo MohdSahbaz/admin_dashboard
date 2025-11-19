@@ -82,7 +82,7 @@ const FilterMasterLocation = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-xl w-80 sm:w-96 shadow-lg space-y-4 relative animate-fadeIn">
+      <div className="bg-white p-6 rounded-md w-80 sm:w-96 shadow-lg space-y-4 relative animate-fadeIn">
         {/* Close Button */}
         <button
           onClick={() => setShowFilter(false)}

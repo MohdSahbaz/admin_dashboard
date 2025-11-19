@@ -89,7 +89,7 @@ const ImportForm = ({ onClose, onSubmit, title = "Import Data" }) => {
   return (
     <div
       ref={cardRef}
-      className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-auto transition-transform duration-300 ease-in-out"
+      className="relative bg-white rounded-md shadow-xl p-6 w-full max-w-md mx-auto transition-transform duration-300 ease-in-out"
       style={{ transform: "translate(0px, 0px)" }}
     >
       {/* === Header (with Drag Handle Button) === */}
@@ -135,7 +135,7 @@ const ImportForm = ({ onClose, onSubmit, title = "Import Data" }) => {
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          className={`border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer ${
+          className={`border-2 border-dashed rounded-md p-6 text-center transition cursor-pointer ${
             isDragging
               ? "border-indigo-500 bg-indigo-50"
               : "border-gray-300 hover:border-indigo-400"

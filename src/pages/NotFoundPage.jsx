@@ -7,7 +7,7 @@ export default function NotFoundPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 p-6">
       {/* Card */}
-      <div className="bg-white shadow-xl rounded-2xl p-10 max-w-md w-full text-center">
+      <div className="bg-white shadow-xl rounded-md p-10 max-w-md w-full text-center">
         {/* Icon */}
         <div className="flex justify-center mb-4">
           <div className="bg-orange-100 text-orange-600 p-4 rounded-full shadow">

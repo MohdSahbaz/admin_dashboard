@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { MdDashboard, MdLogout, MdKeyboardArrowDown } from "react-icons/md";
 import { GiCampingTent, GiSecurityGate } from "react-icons/gi";
@@ -12,11 +12,11 @@ import { useAccess } from "../context/AccessContext";
 const Sidebar = ({ onLogout, open, onClose }) => {
   const { access } = useAccess();
 
-  const [openSections, setOpenSections] = useState({
-    main: true,
-    management: true,
-    reports: true,
-    database: true,
+  const [openSections, setOpenSections] = useState(() => {
+    const saved = localStorage.getItem("sidebar-sections");
+    return saved
+      ? JSON.parse(saved)
+      : { main: true, management: true, reports: true, database: true };
   });
 
   const MAIN_TABS = ["Dashboard", "Doctors", "Camps"];
@@ -29,6 +29,10 @@ const Sidebar = ({ onLogout, open, onClose }) => {
 
   const toggleSection = (section) =>
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+
+  useEffect(() => {
+    localStorage.setItem("sidebar-sections", JSON.stringify(openSections));
+  }, [openSections]);
 
   const linkClass = ({ isActive }) =>
     `relative flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-200 group

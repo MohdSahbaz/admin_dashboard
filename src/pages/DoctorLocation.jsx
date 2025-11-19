@@ -69,8 +69,10 @@ const DoctorLocation = () => {
       const res = await api.get(url);
       setLocationData(res.data.data || []);
       setTotal(res.data.total || 0);
-    } catch {
-      setError("Failed to fetch master locations");
+    } catch (error) {
+      setError(
+        error?.response?.data?.message || "Failed to fetch doctors location"
+      );
     } finally {
       setLoader(false);
     }

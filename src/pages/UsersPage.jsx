@@ -39,9 +39,8 @@ const UsersPage = () => {
       );
       setUsersData(res.data.data || []);
       setTotal(res.data.total || 0);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to fetch users");
+    } catch (error) {
+      setError(error?.response?.data?.message || "Failed to fetch users");
     } finally {
       setLoader(false);
     }

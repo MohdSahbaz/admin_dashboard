@@ -10,7 +10,7 @@ import { useAccess } from "../../context/AccessContext";
 const LoginForm = () => {
   const navigate = useNavigate();
   const { login, isLoggedIn } = useAuth();
-  const { access } = useAccess();
+  const { access, setAccess } = useAccess();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [remember, setRemember] = useState(false);
@@ -19,7 +19,6 @@ const LoginForm = () => {
   useEffect(() => {
     if (isLoggedIn && access?.tabs?.length > 0) {
       const first = access.tabs[0].replace(/\s+/g, "-").toLowerCase();
-      toast.error(`Your session is already active.`);
       navigate(`/${first}`);
     }
   }, [isLoggedIn, access]);
@@ -45,10 +44,15 @@ const LoginForm = () => {
       }
 
       login(user, token, remember);
+      setAccess(user.access);
       toast.success(`Welcome back, ${user.email}!`);
       navigate(`/${user.access.tabs[0].replace(/\s+/g, "-").toLowerCase()}`);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Invalid email or password");
+      const msg = err?.response?.data?.message;
+
+      if (msg) {
+        toast.error(msg || "Invalid email or password");
+      }
     } finally {
       setLoading(false);
     }

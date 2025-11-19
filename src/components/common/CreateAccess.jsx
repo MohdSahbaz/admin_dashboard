@@ -24,57 +24,6 @@ const accessOptions = {
   actions: ["Import", "Export", "Add", "Filter"],
 };
 
-// Auto select schemas based on DB selection
-const autoSelectSchemas = (updated) => {
-  let schemas = [...(updated.schemas || [])];
-
-  const hasLloyd = updated.dbs?.includes("Lloyd DB");
-  const hasD2C = updated.dbs?.includes("D2C");
-
-  // Lloyd DB → must include "Selected"
-  if (hasLloyd && !schemas.includes("Selected")) {
-    schemas.push("Selected");
-  }
-
-  // D2C → must include "Master"
-  if (hasD2C && !schemas.includes("Master")) {
-    schemas.push("Master");
-  }
-
-  return { ...updated, schemas };
-};
-
-// Relationship rules:
-// Lloyd DB ↔ Selected
-// D2C ↔ Master
-
-const syncDBSchema = (updated) => {
-  let dbs = [...(updated.dbs || [])];
-  let schemas = [...(updated.schemas || [])];
-
-  const hasLloyd = dbs.includes("Lloyd DB");
-  const hasD2C = dbs.includes("D2C");
-
-  // DB → Schema rules
-  if (hasLloyd && !schemas.includes("Selected")) schemas.push("Selected");
-  if (!hasLloyd) schemas = schemas.filter((s) => s !== "Selected");
-
-  if (hasD2C && !schemas.includes("Master")) schemas.push("Master");
-  if (!hasD2C) schemas = schemas.filter((s) => s !== "Master");
-
-  // Schema → DB rules
-  const wantsSelected = schemas.includes("Selected");
-  const wantsMaster = schemas.includes("Master");
-
-  if (wantsSelected && !dbs.includes("Lloyd DB")) dbs.push("Lloyd DB");
-  if (!wantsSelected) dbs = dbs.filter((d) => d !== "Lloyd DB");
-
-  if (wantsMaster && !dbs.includes("D2C")) dbs.push("D2C");
-  if (!wantsMaster) dbs = dbs.filter((d) => d !== "D2C");
-
-  return { ...updated, dbs, schemas };
-};
-
 const CreateAccess = ({
   form,
   setForm,
@@ -123,10 +72,35 @@ const CreateAccess = ({
     setCopied(false);
   };
 
+  const masterSelected = selectedAccess.schemas.includes("Master");
+  const lloydSelected = selectedAccess.dbs.includes("Lloyd DB");
+
+  useEffect(() => {
+    if (!masterSelected) {
+      setSelectedAccess((prev) => ({
+        ...prev,
+        tabs: prev.tabs.filter(
+          (t) => t !== "Camps" && t !== "Users" && t !== "Doctors Location"
+        ),
+      }));
+    }
+  }, [masterSelected]);
+
+  useEffect(() => {
+    if (lloydSelected) {
+      setSelectedAccess((prev) => ({
+        ...prev,
+        schemas: prev.schemas.includes("Selected")
+          ? prev.schemas
+          : [...prev.schemas, "Selected"], // auto add
+      }));
+    }
+  }, [selectedAccess.dbs]);
+
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
       <div
-        className="relative bg-white rounded-2xl w-[92%] md:w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl animate-fadeIn border border-gray-100 transition-all duration-300"
+        className="relative bg-white rounded-md w-[92%] md:w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl animate-fadeIn border border-gray-100 transition-all duration-300"
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "#cbd5e1 transparent",
@@ -263,7 +237,7 @@ const CreateAccess = ({
           </div>
 
           {/* Access Permissions */}
-          <div className="border rounded-2xl p-5 bg-gray-50">
+          <div className="border rounded-md p-5 bg-gray-50">
             <h3 className="text-sm font-semibold mb-4 text-gray-700">
               Access Permissions
             </h3>
@@ -309,20 +283,36 @@ const CreateAccess = ({
               {/* Tabs Section */}
               <div>
                 <h4 className="font-medium mb-2 text-gray-800">Tabs</h4>
-                {accessOptions.tabs.map((tab) => (
-                  <label
-                    key={tab}
-                    className="block text-gray-700 cursor-pointer select-none mb-1"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedAccess.tabs?.includes(tab)}
-                      onChange={() => handleCheckboxChange("tabs", tab)}
-                      className="mr-2 accent-blue-600"
-                    />
-                    {tab}
-                  </label>
-                ))}
+                {accessOptions.tabs.map((tab) => {
+                  const restricted = [
+                    "Camps",
+                    "Users",
+                    "Doctors Location",
+                  ].includes(tab);
+
+                  return (
+                    <label
+                      key={tab}
+                      className={`block text-gray-700 select-none mb-1 ${
+                        !masterSelected && restricted
+                          ? "opacity-40 cursor-not-allowed"
+                          : "cursor-pointer"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        disabled={!masterSelected && restricted}
+                        checked={selectedAccess.tabs?.includes(tab)}
+                        onChange={() =>
+                          (!restricted || masterSelected) &&
+                          handleCheckboxChange("tabs", tab)
+                        }
+                        className="mr-2 accent-blue-600"
+                      />
+                      {tab}
+                    </label>
+                  );
+                })}
               </div>
 
               {/* Databases Section */}
@@ -338,14 +328,14 @@ const CreateAccess = ({
                       checked={selectedAccess.dbs?.includes(db)}
                       onChange={() => {
                         setSelectedAccess((prev) => {
-                          let updatedDBs = prev.dbs.includes(db)
-                            ? prev.dbs.filter((d) => d !== db)
-                            : [...prev.dbs, db];
+                          const exists = prev.dbs.includes(db);
 
-                          return syncDBSchema({
+                          return {
                             ...prev,
-                            dbs: updatedDBs,
-                          });
+                            dbs: exists
+                              ? prev.dbs.filter((d) => d !== db)
+                              : [...prev.dbs, db],
+                          };
                         });
                       }}
                       className="mr-2 accent-blue-600"
@@ -365,18 +355,28 @@ const CreateAccess = ({
                   >
                     <input
                       type="checkbox"
+                      disabled={
+                        schema === "Selected" &&
+                        selectedAccess.dbs.includes("Lloyd DB") // prevent unchecking
+                      }
                       checked={selectedAccess.schemas?.includes(schema)}
-                      disabled={true}
                       onChange={() => {
-                        setSelectedAccess((prev) => {
-                          let updatedSchemas = prev.schemas.includes(schema)
-                            ? prev.schemas.filter((s) => s !== schema)
-                            : [...prev.schemas, schema];
+                        if (
+                          schema === "Selected" &&
+                          selectedAccess.dbs.includes("Lloyd DB")
+                        ) {
+                          return; // stop unchecking
+                        }
 
-                          return syncDBSchema({
+                        setSelectedAccess((prev) => {
+                          const exists = prev.schemas.includes(schema);
+
+                          return {
                             ...prev,
-                            schemas: updatedSchemas,
-                          });
+                            schemas: exists
+                              ? prev.schemas.filter((s) => s !== schema)
+                              : [...prev.schemas, schema],
+                          };
                         });
                       }}
                       className="mr-2 accent-blue-600"

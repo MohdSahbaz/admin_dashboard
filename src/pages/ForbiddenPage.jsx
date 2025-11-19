@@ -13,7 +13,7 @@ export default function ForbiddenPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-10 text-center">
+      <div className="bg-white w-full max-w-md rounded-md shadow-lg p-10 text-center">
         {/* Icon */}
         <div className="flex justify-center mb-4">
           <div className="p-4 bg-gray-100 rounded-full">

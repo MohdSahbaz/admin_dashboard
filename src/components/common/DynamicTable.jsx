@@ -1,5 +1,5 @@
 import Loader from "./Loader";
-import { BiSort, BiSortUp, BiSortDown } from "react-icons/bi";
+import { BiSort, BiSortUp, BiSortDown, BiErrorCircle } from "react-icons/bi";
 
 const DynamicTable = ({
   columns = [],
@@ -37,7 +37,10 @@ const DynamicTable = ({
           <Loader />
         </div>
       ) : error ? (
-        <div className="text-center py-6 text-red-600">{error}</div>
+        <div className="flex flex-col justify-center items-center py-10 text-red-600">
+          <BiErrorCircle className="text-5xl mb-2" />
+          <p className="text-base font-medium">{error}</p>
+        </div>
       ) : data.length === 0 ? (
         <div className="text-center py-6 text-gray-500 italic">
           {emptyMessage}

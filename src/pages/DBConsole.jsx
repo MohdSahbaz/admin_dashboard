@@ -263,7 +263,7 @@ const DBConsole = () => {
         />
 
         {/* Query Editor */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 relative">
+        <div className="bg-white rounded-md shadow-md border border-gray-200 relative">
           <div className="flex justify-between items-center px-5 py-3 border-b bg-gray-50">
             <h3 className="text-gray-700 font-semibold flex items-center gap-2">
               <FaCode className="text-blue-600" />
@@ -334,7 +334,7 @@ const DBConsole = () => {
 
                   {/* Export Card */}
                   {showExportOptions && (
-                    <div className="absolute right-0 mt-2 w-52 backdrop-blur-lg bg-white/95 border border-gray-200 shadow-2xl rounded-xl overflow-hidden z-[9999] animate-popUp">
+                    <div className="absolute right-0 mt-2 w-52 backdrop-blur-lg bg-white/95 border border-gray-200 shadow-2xl rounded-md overflow-hidden z-[9999] animate-popUp">
                       <button
                         onClick={() => {
                           setShowExportOptions(false); // 👈 auto close before export
@@ -382,7 +382,7 @@ const DBConsole = () => {
         </div>
 
         {/* Query Results */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-5 overflow-x-auto md:max-w-[calc(100vw-19rem)]">
+        <div className="bg-white rounded-md shadow-md border border-gray-200 p-5 overflow-x-auto md:max-w-[calc(100vw-19rem)]">
           <h2 className="text-lg font-semibold mb-4 text-gray-800 flex items-center gap-2">
             <FaTable className="text-blue-600" />
             Results
@@ -397,7 +397,7 @@ const DBConsole = () => {
             <Loader />
           ) : error ? (
             // 🔴 Error Card
-            <div className="flex flex-col items-center justify-center text-center py-8 px-6 rounded-xl border border-red-200 bg-red-50/80 shadow-sm animate-fadeIn">
+            <div className="flex flex-col items-center justify-center text-center py-8 px-6 rounded-md border border-red-200 bg-red-50/80 shadow-sm animate-fadeIn">
               <div className="flex items-center gap-2 text-base font-semibold text-red-700 mb-2">
                 <FaExclamationCircle className="text-red-600 text-lg" />
                 {error}
@@ -428,7 +428,7 @@ const DBConsole = () => {
             </>
           ) : queryMessage ? (
             // 🟢 Success / Info Card
-            <div className="flex flex-col items-center justify-center text-center py-8 px-6 rounded-xl border border-green-200 bg-green-50/80 shadow-sm animate-fadeIn">
+            <div className="flex flex-col items-center justify-center text-center py-8 px-6 rounded-md border border-green-200 bg-green-50/80 shadow-sm animate-fadeIn">
               <div className="flex items-center gap-2 text-base font-semibold text-green-700 mb-2">
                 <FaCheckCircle className="text-green-600 text-lg" />
                 {queryMessage}

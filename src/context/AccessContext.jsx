@@ -22,7 +22,6 @@ export const AccessProvider = ({ children }) => {
 
     try {
       const res = await api.get("/admin/get-access-me");
-
       setAccess(res.data?.data?.access || { tabs: [], dbs: [], schemas: [] });
     } catch (err) {
       console.error("Failed to load access:", err);
@@ -36,10 +35,18 @@ export const AccessProvider = ({ children }) => {
   }, [token, isLoggedIn]);
 
   useEffect(() => {
-  }, [access]);
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      setAccess(parsed.access);
+    }
+  }, []);
 
   return (
-    <AccessContext.Provider value={{ access, loadingAccess, fetchAccess }}>
+    <AccessContext.Provider
+      value={{ access, loadingAccess, fetchAccess, setAccess }}
+    >
       {children}
     </AccessContext.Provider>
   );

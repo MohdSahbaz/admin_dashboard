@@ -53,7 +53,7 @@ const AddLocation = ({ mode = "master", db = "d2c", onSuccess, onCancel }) => {
       style={{ overflow: "hidden" }} // prevent background scroll
     >
       <div
-        className="relative bg-white rounded-2xl w-[92%] md:w-[700px] max-h-[90vh] overflow-y-auto shadow-2xl animate-fadeIn border border-gray-100 transition-all duration-300"
+        className="relative bg-white rounded-md w-[92%] md:w-[700px] max-h-[90vh] overflow-y-auto shadow-2xl animate-fadeIn border border-gray-100 transition-all duration-300"
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "#cbd5e1 transparent",

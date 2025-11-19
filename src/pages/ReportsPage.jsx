@@ -33,7 +33,7 @@ const ReportsPage = () => {
   useEffect(() => {
     const fetchDivisions = async () => {
       try {
-        const res = await api.get("/admin/get-all-divisions");
+        const res = await api.get("/admin/get-emp-divisions");
 
         const formatted = (res.data.data || []).map((division) => ({
           label: division,
@@ -42,7 +42,9 @@ const ReportsPage = () => {
 
         setDivisionList(formatted);
       } catch (err) {
-        toast.error("Failed to fetch divisions");
+        toast.error(
+          err?.response?.data?.message || "Failed to fetch divisions"
+        );
       }
     };
 
@@ -144,7 +146,7 @@ const ReportsPage = () => {
                 }
               }}
               className="
-    cursor-pointer bg-white shadow-md rounded-xl 
+    cursor-pointer bg-white shadow-md rounded-md 
     p-6 border border-gray-200 
     hover:shadow-xl hover:border-blue-500 
     transition transform hover:-translate-y-1
@@ -153,7 +155,7 @@ const ReportsPage = () => {
             >
               {/* CARD LOADER */}
               {backgroundLoading[key] && (
-                <div className="absolute inset-0 bg-white/70 flex flex-col justify-center items-center gap-2 rounded-xl">
+                <div className="absolute inset-0 bg-white/70 flex flex-col justify-center items-center gap-2 rounded-md">
                   <svg
                     className="animate-spin h-8 w-8 text-blue-700"
                     xmlns="http://www.w3.org/2000/svg"
@@ -208,7 +210,7 @@ const ReportsPage = () => {
         {/* MODAL - Styled same as FilterMasterDoc */}
         {openModal && (
           <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-xl w-80 sm:w-[380px] shadow-lg space-y-4 relative animate-fadeIn">
+            <div className="bg-white p-6 rounded-md w-80 sm:w-[380px] shadow-lg space-y-4 relative animate-fadeIn">
               {/* Close */}
               <button
                 onClick={() => setOpenModal(null)}

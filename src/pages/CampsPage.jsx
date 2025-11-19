@@ -71,8 +71,8 @@ const CampsPage = () => {
       const response = await api.get(url);
       setCampData(response.data.data || []);
       setTotal(response.data.total || 0);
-    } catch {
-      setError("Failed to fetch camps");
+    } catch (error) {
+      setError(error?.response?.data?.message || "Failed to fetch camps");
     } finally {
       setLoader(false);
     }

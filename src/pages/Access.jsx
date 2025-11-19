@@ -72,8 +72,7 @@ const Access = () => {
       setAccessData(res.data.data || []);
       setTotal(res.data.total || 0);
     } catch (error) {
-      console.error(error);
-      setError("Failed to load access list");
+      setError(error?.response?.data?.message || "Failed to load access list");
     } finally {
       setLoading(false);
     }

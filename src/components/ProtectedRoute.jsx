@@ -48,7 +48,9 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // Match route to required permission
-  const routePath = location.pathname.replace("/", "").toLowerCase();
+  // const routePath = location.pathname.replace("/", "").toLowerCase();
+  const routePath = location.pathname.split("/")[1]?.toLowerCase() || "";
+
   const routeToPermission = {
     "": "Dashboard",
     doctors: "Doctors",
